@@ -151,13 +151,19 @@ function renderStats() {
   const pend = total - verCount;
   const lossV = ents.filter(e => e.verified).reduce((s, e) => s + e.loss, 0);
   const lossP = ents.reduce((s, e) => s + e.loss, 0) - lossV;
-  document.getElementById("statsBody").innerHTML =
-    `<div class="kv">📝 တိုင်ကြားမှု စုစုပေါင်း: <b>${total}</b></div>` +
-    `<div class="kv">✅ အတည်ပြုပြီး: <b>${verCount}</b></div>` +
-    `<div class="kv">🔍 စစ်ဆေးဆဲ: <b>${pend}</b></div>` +
-    `<div class="kv">🔍 စစ်ဆေးဆဲ ဆုံးရှုံးငွေ: <b>${fmtNum(lossP)} MMK</b></div>` +
-    `<div class="kv">✔️ အတည်ပြုပြီး ဆုံးရှုံးငွေ: <b>${fmtNum(lossV)} MMK</b></div>`;
+  const cards = [
+    [total, "\uD83D\uDCDD တိုင်ကြားမှု"],
+    [verCount, "✅ အတည်ပြုပြီး"],
+    [pend, "\uD83D\uDD0D စစ်ဆေးဆဲ"],
+    [fmtNum(lossV) + " MMK", "\uD83D\uDCB8 အတည်ပြုပြီး ဆုံးရှုံးငွေ"],
+  ];
+  document.getElementById("statsBody").innerHTML = cards.map(([n, l]) =>
+    `<div class="stat"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`
+  ).join("");
+  const ll = document.getElementById("lossLine");
+  if (ll) ll.textContent = `စစ်ဆေးဆဲ: ${fmtNum(lossP)} MMK · အတည်ပြုပြီး: ${fmtNum(lossV)} MMK`;
 }
+
 
 /* ---------- search ---------- */
 function findMatches(q) {
@@ -191,14 +197,15 @@ function renderResult(q) {
   const box = document.getElementById("result");
   const m = findMatches(q);
   if (!m) {
-    box.innerHTML = `<div class="hit pending"><h3>ℹ️</h3>
-      <p>ဖုန်းနံပါတ် (သို့) Telegram ID ထည့်ပေးပါ<br>ဥပမာ: 09123456789 / 123456789</p></div>`;
+    box.innerHTML = `<div class="rcard warn"><div class="rhead"><span class="badge warn">ℹ️</span></div>
+      <p class="rnote">ဖုန်းနံပါတ် / Telegram ID / ဘဏ်အကောင့်နံပါတ် ထည့်ပေးပါ<br>ဥပမာ: 09123456789</p></div>`;
     return;
   }
   if (!m.hits.length) {
-    box.innerHTML = `<div class="hit safe"><h3>✅ မှတ်တမ်း မတွေ့ပါ</h3>
-      <p>${esc(m.label)} နဲ့ ပတ်သက်တဲ့ တိုင်ကြားချက် မရှိသေးပါ။<br>
-      <span class="muted">မှတ်တမ်း မရှိတာဟာ လုံးဝ စိတ်ချရတယ်လို့ မဆိုလိုပါ — သတိထားဆက်ဆံပါ။</span></p></div>`;
+    box.innerHTML = `<div class="rcard ok">
+      <div class="rhead"><span class="badge ok">✅ မှတ်တမ်း မတွေ့ပါ</span></div>
+      <div class="rtitle">${esc(m.label)}</div>
+      <p class="rnote">ဒီအချက်အလက်နဲ့ ပတ်သက်တဲ့ တိုင်ကြားချက် မရှိသေးပါ။<br>မှတ်တမ်း မရှိတာဟာ လုံးဝ စိတ်ချရတယ်လို့ မဆိုလိုပါ — သတိထားဆက်ဆံပါ။</p></div>`;
     return;
   }
   // entity အလိုက် စု (bot နဲ့ အတူတူ union-find)
@@ -224,24 +231,30 @@ function renderGroup(label, rows) {
   const tgIds = [...new Set(rows.map(r => String(r[C.tgId] || "").trim()).filter(Boolean))];
 
   if (!verified) {
-    return `<div class="hit pending"><span class="badge pending">🔍 စစ်ဆေးဆဲ</span>
-      <h3>${esc(label)}</h3>
-      <p>🔍 စစ်ဆေးနေဆဲဖြစ်ပါတယ်။</p>
-      <p class="muted">အယူခံဝင်ရန်: Telegram Bot မှာ "admin" လို့ ရိုက်ပါ / scamwatchmyanmar@gmail.com</p></div>`;
+    return `<div class="rcard warn">
+      <div class="rhead"><span class="badge warn">🔍 စစ်ဆေးဆဲ</span></div>
+      <div class="rtitle">${esc(label)}</div>
+      <p class="rnote">ဒီအချက်အလက်ကို တိုင်ကြားခံထားရပြီး <b>စစ်ဆေးနေဆဲဖြစ်ပါတယ်</b>။<br>သတိထားဆက်ဆံပါ။</p>
+      <p class="rnote">အယူခံဝင်ရန်: Telegram Bot မှာ "admin" လို့ ရိုက်ပါ / scamwatchmyanmar@gmail.com</p></div>`;
   }
   const descs = [...new Set(rows.map(r => r[C.story]).filter(Boolean))];
   const tgUrls = [...new Set(rows.map(r => (r[C.tgUrl] || "").trim()).filter(Boolean))];
-  return `<div class="hit"><span class="badge verified">⚠️ အတည်ပြုပြီး</span>
-    <h3>${esc(label)}</h3>
-    ${names.length ? `<div class="kv"><b>နာမည်:</b> ${esc(names.join(", "))}</div>` : ""}
-    ${fbs.length ? `<div class="kv"><b>Facebook:</b> ${esc(fbs.join(", "))}</div>` : ""}
-    ${phones.length ? `<div class="kv"><b>ဖုန်း:</b> ${phones.map(maskPhone).map(esc).join(", ")}</div>` : ""}
-    ${tgIds.length ? `<div class="kv"><b>🆔 Telegram ID:</b> ${tgIds.map(esc).join(", ")}</div>` : ""}
-    ${payLines.length ? `<div class="kv"><b>💳 ငွေပေးချေမှု:</b> ${payLines.map(esc).join("; ")}</div>` : ""}
-    ${types.length ? `<div class="kv"><b>လိမ်နည်း:</b> ${esc(types.join(", "))}</div>` : ""}
-    ${loss ? `<div class="kv"><b>💸 ဆုံးရှုံးငွေ:</b> ${fmtNum(loss)} MMK</div>` : ""}
-    ${descs.map(d => `<div class="story"><b>\u1016\u103c\u1005\u103a\u100a\u1004\u103a\u1038 \u1021\u1000\u103b\u1009\u103a\u1038\u1001\u103b\u1009\u103a\u1038:</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
-    ${tgUrls.length ? `<div class="kv">\uD83D\uDCD6 <a href="${esc(tgUrls[0])}" target="_blank" rel="noopener">\u1021\u1015\u103c\u100A\u1037\u103A\u1021\u1005\u102F\u1036\u1016\u1010\u1039\u101B\u1014\u103a</a></div>` : ""}
+  const row = (k, v) => v ? `<div class="rrow"><span class="k">${k}</span><span class="v">${v}</span></div>` : "";
+  return `<div class="rcard danger">
+    <div class="rhead"><span class="badge danger">⚠️ အတည်ပြုပြီး လိမ်လည်မှု</span></div>
+    <div class="rtitle">${esc(label)}</div>
+    <div class="rrows">
+      ${row("နာမည်", esc(names.join(", ")))}
+      ${row("Facebook", esc(fbs.join(", ")))}
+      ${row("ဖုန်း", phones.map(maskPhone).map(esc).join(", "))}
+      ${row("Telegram ID", tgIds.map(esc).join(", "))}
+      ${row("ငွေပေးချေမှု", payLines.map(esc).join("; "))}
+      ${row("လိမ်နည်း", esc(types.join(", ")))}
+      ${row("ဆုံးရှုံးငွေ", loss ? fmtNum(loss) + " MMK" : "")}
+    </div>
+    ${descs.map(d => `<div class="story"><b>ဖြစ်စဉ် အကျဉ်းချုပ်</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
+    ${tgUrls.length ? `<a class="readmore" href="${esc(tgUrls[0])}" target="_blank" rel="noopener">📖 အပြည့်အစုံဖတ်ရန်</a>` : ""}
+    <p class="rnote">⛔ ဒီအချက်အလက်နဲ့ ဆက်သွယ်မှု / ငွေလွှဲ မလုပ်ပါနဲ့။</p>
   </div>`;
 }
 
@@ -249,7 +262,8 @@ function renderGroup(label, rows) {
 document.getElementById("searchForm").addEventListener("submit", e => {
   e.preventDefault();
   const q = document.getElementById("q").value;
-  document.getElementById("result").innerHTML = `<p class="muted">⏳ စစ်ဆေးနေပါတယ်...</p>`;
+  document.getElementById("result").innerHTML =
+    `<div class="loading"><span class="spinner"></span>စစ်ဆေးနေပါတယ်...</div>`;
   setTimeout(() => renderResult(q), 1200);
 });
 

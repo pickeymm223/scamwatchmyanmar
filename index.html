@@ -3,55 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ScamWatch Myanmar — ဖုန်း၊ Telegram ID၊ ဘဏ်အကောင့်နံပါတ်များဖြင့် လိမ်လည်မှုမှတ်တမ်း စစ်ဆေးရန်">
 <title>ScamWatch Myanmar — လိမ်လည်မှု စစ်ဆေးရန်</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <h1>🛡️ ScamWatch Myanmar</h1>
-    <p class="tag">လိမ်လည်မှု မှတ်တမ်း စစ်ဆေးရေး</p>
+
+<header class="topbar">
+  <div class="wrap bar-in">
+    <a class="brand" href="#">🛡️ ScamWatch Myanmar</a>
+    <nav>
+      <a href="#search">စစ်ဆေးရန်</a>
+      <a href="#report">တိုင်ကြားရန်</a>
+    </nav>
   </div>
 </header>
 
-<main class="wrap">
-  <section id="stats" class="card">
-    <h2>📊 Data Status</h2>
-    <div id="statsBody"><p class="muted">⏳ Data ရယူနေပါတယ်...</p></div>
-  </section>
-
-  <section class="card">
-    <h2>🔍 စစ်ဆေးရန်</h2>
-    <p class="muted">ဖုန်းနံပါတ် / Telegram ID / ဘဏ်အကောင့်နံပါတ် ရိုက်ထည့်ပါ</p>
-    <form id="searchForm">
-      <input id="q" type="text" inputmode="text" autocomplete="off"
-             placeholder="ဥပမာ: 09123456789 / 123456789 / ဘဏ်အကောင့်">
-      <button type="submit">စစ်ဆေးမယ်</button>
+<section class="hero">
+  <div class="wrap">
+    <h1>မယုံကြည်ခင်<br>ကြိုတင် စစ်ဆေးပါ</h1>
+    <p class="lede">ဖုန်းနံပါတ်၊ Telegram ID၊ ဘဏ်အကောင့်နံပါတ်များဖြင့် လိမ်လည်မှုမှတ်တမ်း ရှိ/မရှိ ချက်ချင်းစစ်နိုင်ပါတယ်။</p>
+    <form id="searchForm" class="searchbox" autocomplete="off">
+      <input id="q" type="text" inputmode="text"
+             placeholder="ဥပမာ: 09123456789 / Telegram ID / ဘဏ်အကောင့်" aria-label="ရှာဖွေရန်">
+      <button type="submit">🔍 စစ်ဆေးမယ်</button>
     </form>
-    <div id="result"></div>
+    <div id="result" aria-live="polite"></div>
+  </div>
+</section>
+
+<main class="wrap">
+  <section id="stats" class="stats">
+    <div id="statsBody" class="stats-grid">
+      <div class="stat"><div class="stat-num">–</div><div class="stat-label">📝 တိုင်ကြားမှု</div></div>
+      <div class="stat"><div class="stat-num">–</div><div class="stat-label">✅ အတည်ပြုပြီး</div></div>
+      <div class="stat"><div class="stat-num">–</div><div class="stat-label">🔍 စစ်ဆေးဆဲ</div></div>
+      <div class="stat"><div class="stat-num">–</div><div class="stat-label">💸 အတည်ပြုပြီး ဆုံးရှုံးငွေ</div></div>
+    </div>
+    <p class="fine">ဆုံးရှုံးငွေ: <span id="lossLine">–</span></p>
   </section>
 
-  <section class="card">
-    <h2>📝 တိုင်ကြားရန်</h2>
-    <p>အလိမ်ခံရရင် ဒီ Form ကနေ တိုင်ကြားနိုင်ပါတယ်:</p>
+  <section id="report" class="card">
+    <h2>📝 အလိမ်ခံရရင် တိုင်ကြားပါ</h2>
+    <p>ဖြစ်စဉ်အသေးစိတ်နဲ့ သက်သေအထောက်အထားများ ဖြည့်စွက်ပြီး တိုင်ကြားနိုင်ပါတယ်။ တိုင်ကြားချက်များကို စစ်ဆေးပြီးမှ ထုတ်ပြန်ပါတယ်။</p>
     <a class="btn" href="https://forms.gle/p2orbuDB9kPXFmnVA" target="_blank" rel="noopener">တိုင်ကြားရန် Form ဖွင့်မယ်</a>
   </section>
 
   <section class="card">
     <h2>📧 အယူခံဝင်ရန်</h2>
-    <p>မှတ်တမ်း မှားယွင်းနေတယ်ထင်ရင်:</p>
-    <ul>
+    <p>မှတ်တမ်း မှားယွင်းနေတယ်ထင်ရင် ပြန်လည်စစ်ဆေးပေးဖို့ တောင်းဆိုနိုင်ပါတယ်:</p>
+    <ul class="tight">
       <li>Telegram Bot မှာ <b>"admin"</b> လို့ ရိုက်ပြီး စာပို့ပါ — <a href="https://t.me/ScamWatchMM_Bot" target="_blank" rel="noopener">@ScamWatchMM_Bot</a></li>
       <li>Email: <b>scamwatchmyanmar@gmail.com</b></li>
     </ul>
   </section>
+
+  <p class="disclaimer">⚠️ မှတ်တမ်း မတွေ့တာဟာ လုံးဝ စိတ်ချရတယ်လို့ မဆိုလိုပါ — အရောင်းအဝယ်တိုင်း သတိထားဆက်ဆံပါ။</p>
 </main>
 
 <footer>
-  <div class="wrap">
-    <a href="https://t.me/ScamWatchMyanmar" target="_blank" rel="noopener">📢 Telegram Channel</a>
-    <span> · </span>
-    <a href="https://t.me/ScamWatchMM_Bot" target="_blank" rel="noopener">🤖 Telegram Bot</a>
+  <div class="wrap foot-in">
+    <div class="foot-links">
+      <a href="https://t.me/ScamWatchMyanmar" target="_blank" rel="noopener">📢 Telegram Channel</a>
+      <a href="https://t.me/ScamWatchMM_Bot" target="_blank" rel="noopener">🤖 Telegram Bot</a>
+    </div>
+    <p class="fine">🛡️ ScamWatch Myanmar — အများပြည်သူ လိမ်လည်မှုတိုင်ကြားရေး</p>
   </div>
 </footer>
 
