@@ -48,13 +48,12 @@ a { color: var(--navy2); }
 .topbar nav a:hover { color: #fff; }
 
 /* ---------- language switcher ---------- */
-.langsw { display: flex; gap: 4px; margin-left: 12px; }
-.langsw button {
-  background: rgba(255,255,255,.12); color: rgba(255,255,255,.85);
+.langsel {
+  background: rgba(255,255,255,.12); color: #fff;
   border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
-  font-size: .75rem; font-weight: 700; padding: 4px 8px; cursor: pointer;
+  font-size: .8rem; font-weight: 700; padding: 5px 6px; margin-left: 12px; cursor: pointer;
 }
-.langsw button.active { background: #fff; color: var(--navy); border-color: #fff; }
+.langsel option { color: #111; }
 
 /* ---------- hero ---------- */
 .hero {
