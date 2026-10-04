@@ -66,11 +66,12 @@ function normCcy(v) {
 }
 /* Payment logos — data-driven: only shows logos for payment types in the reports */
 const PAY_LOGOS = [
-  [/kbz\s*pay/i, "logos/kbzpay.png", "KBZPay"],
-  [/wave/i, "logos/wavepay.jpg", "WavePay"],
-  [/kbz\s*bank/i, "logos/kbzbank.png", "KBZ Bank"],
-  [/binance/i, "logos/binance.png", "Binance"],
+  [/kbz\s*pay/i, "kbzpay", "KBZPay"],
+  [/wave/i, "wavepay", "WavePay"],
+  [/kbz\s*bank/i, "kbzbank", "KBZ Bank"],
+  [/binance/i, "binance", "Binance"],
 ];
+function payLogo(key) { return (typeof LOGO_DATA !== "undefined" && LOGO_DATA[key]) || ""; }
 function renderPayLogos() {
   const grid = document.getElementById("payGrid");
   if (!grid) return;
@@ -84,14 +85,52 @@ function renderPayLogos() {
     if (po) seen.add(po);
   });
   const items = [];
-  PAY_LOGOS.forEach(([re, logo, name]) => {
+  PAY_LOGOS.forEach(([re, key, name]) => {
     for (const p of seen) {
-      if (re.test(p)) { items.push([logo, name]); break; }
+      if (re.test(p)) { items.push([payLogo(key), name]); break; }
     }
   });
   grid.innerHTML = items.map(([logo, name]) =>
     `<div class="pay-logo"><img src="${logo}" alt="${esc(name)}" loading="lazy"></div>`
   ).join("");
+}
+/* Payment scam statistics — ranked by report count, with logos */
+function renderPayStats() {
+  const el = document.getElementById("payStats");
+  if (!el) return;
+  const counts = {};
+  ROWS.forEach(r => {
+    String(r[C.payType] || "").split(",").forEach(p => {
+      p = p.trim();
+      if (p && p !== "အခြား") counts[p] = (counts[p] || 0) + 1;
+    });
+    const po = String(r[C.payOther] || "").trim();
+    if (po) counts[po] = (counts[po] || 0) + 1;
+  });
+  // match to known logos
+  const ranked = [];
+  PAY_LOGOS.forEach(([re, key, name]) => {
+    let n = 0;
+    for (const p in counts) { if (re.test(p)) n += counts[p]; }
+    if (n > 0) ranked.push([payLogo(key), name, n]);
+  });
+  // unknown payment types without logos
+  for (const p in counts) {
+    if (!PAY_LOGOS.some(([re]) => re.test(p))) ranked.push(["", p, counts[p]]);
+  }
+  ranked.sort((a, b) => b[2] - a[2]);
+  const max = ranked.length ? ranked[0][2] : 1;
+  el.innerHTML = ranked.map(([logo, name, n], i) => {
+    const pct = Math.round(n / max * 100);
+    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
+    const img = logo ? `<img src="${logo}" alt="${esc(name)}" loading="lazy">` : `<span class="pay-name">${esc(name)}</span>`;
+    return `<div class="paystat-row">
+      <span class="paystat-medal">${medal}</span>
+      <span class="paystat-logo">${img}</span>
+      <div class="paystat-bar-wrap"><div class="paystat-bar" style="width:${pct}%"></div></div>
+      <span class="paystat-count">${n}</span>
+    </div>`;
+  }).join("") || `<p class="muted">${t("no_data")}</p>`;
 }
 function fmtLossTotals(byCcy) {
   const parts = Object.entries(byCcy).filter(([, a]) => a > 0)
@@ -272,6 +311,7 @@ function renderStats() {
     `<div class="stat"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`
   ).join("");
   renderPayLogos();
+  renderPayStats();
   const ll = document.getElementById("lossLine");
   if (ll) ll.textContent = t("loss_line").replace("{p}", fmtLossTotals(lossPccy)).replace("{v}", fmtLossTotals(lossVccy));
 }
