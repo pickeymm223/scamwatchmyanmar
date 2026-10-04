@@ -119,7 +119,10 @@ async function loadData() {
   ROWS = rows.filter(r => {
     const st = String(r[C.status] || "").trim().toLowerCase();
     if (IGNORED.has(st)) return false;
-    return (r[C.phone] || "").trim() !== "" || (r[C.tgId] || "").trim() !== "";
+    // bot နဲ့ အတူ: ဖုန်း / TG ID / ဘဏ်အကောင့် တခုခု ရှိရင် ထည့်
+    return (r[C.phone] || "").trim() !== ""
+        || (r[C.tgId] || "").trim() !== ""
+        || (r[C.bankAcct] || "").trim() !== "";
   });
   renderStats();
 }
