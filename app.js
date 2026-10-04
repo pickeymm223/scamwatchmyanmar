@@ -5,7 +5,7 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/1odYBdPi93Tt3oydiQquhyoT
 const C = {
   phone: 2, name: 3, facebook: 4, telegram: 5,
   scamType: 6, payType: 7, accName: 8, bankAcct: 9,
-  story: 10, loss: 12, viber: 17, otherPhones: 20, tgId: 21, status: 22
+  story: 10, loss: 12, viber: 17, otherPhones: 20, tgId: 21, status: 22, tgUrl: 23
 };
 
 let ROWS = [];
@@ -55,6 +55,14 @@ function maskAcct(a) {
   const d = String(a || "").replace(/\D/g, "");
   if (d.length < 6) return a;
   return d.slice(0, 3) + "*".repeat(Math.max(0, d.length - 5)) + d.slice(-2);
+}
+function summarize(t, per) {
+  t = String(t || "");
+  per = per || 220;
+  if (t.length <= per) return t;
+  const cut = t.slice(0, per);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > 0 ? cut.slice(0, sp) : cut) + "\u2026";
 }
 function esc(s) {
   return String(s || "").replace(/[&<>"']/g, c =>
@@ -206,7 +214,8 @@ function renderGroup(label, rows) {
       <p>🔍 စစ်ဆေးနေဆဲဖြစ်ပါတယ်။</p>
       <p class="muted">အယူခံဝင်ရန်: Telegram Bot မှာ "admin" လို့ ရိုက်ပါ / scamwatchmyanmar@gmail.com</p></div>`;
   }
-  const story = rows.map(r => r[C.story]).filter(Boolean).join("\n\n");
+  const descs = [...new Set(rows.map(r => r[C.story]).filter(Boolean))];
+  const tgUrls = [...new Set(rows.map(r => (r[C.tgUrl] || "").trim()).filter(Boolean))];
   return `<div class="hit"><span class="badge verified">⚠️ အတည်ပြုပြီး</span>
     <h3>${esc(label)}</h3>
     ${names.length ? `<div class="kv"><b>နာမည်:</b> ${esc(names.join(", "))}</div>` : ""}
@@ -216,7 +225,8 @@ function renderGroup(label, rows) {
     ${payLines.length ? `<div class="kv"><b>💳 ငွေပေးချေမှု:</b> ${payLines.map(esc).join("; ")}</div>` : ""}
     ${types.length ? `<div class="kv"><b>လိမ်နည်း:</b> ${esc(types.join(", "))}</div>` : ""}
     ${loss ? `<div class="kv"><b>💸 ဆုံးရှုံးငွေ:</b> ${fmtNum(loss)} MMK</div>` : ""}
-    ${story ? `<div class="story">${esc(maskPhonesInText(story))}</div>` : ""}
+    ${descs.map(d => `<div class="story"><b>\u1016\u103c\u1005\u103a\u100a\u1004\u103a\u1038 \u1021\u1000\u103b\u1009\u103a\u1038\u1001\u103b\u1009\u103a\u1038:</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
+    ${tgUrls.length ? `<div class="kv">\uD83D\uDCD6 <a href="${esc(tgUrls[0])}" target="_blank" rel="noopener">\u1021\u1015\u103c\u100A\u1037\u103A\u1021\u1005\u102F\u1036\u1016\u1010\u1039\u101B\u1014\u103a</a></div>` : ""}
   </div>`;
 }
 
