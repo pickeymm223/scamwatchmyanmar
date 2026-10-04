@@ -9,6 +9,7 @@ const C = {
 };
 
 let ROWS = [];
+const IGNORED = new Set(["merged", "duplicate", "rejected"]);
 
 /* ---------- CSV parse (quoted fields, embedded newlines) ---------- */
 function parseCSV(text) {
@@ -83,24 +84,60 @@ async function loadData() {
   if (!res.ok) throw new Error("HTTP " + res.status);
   const text = await res.text();
   const rows = parseCSV(text).slice(1); // header ဖြုတ်
-  ROWS = rows.filter(r => (r[C.phone] || "").trim() !== "" || (r[C.tgId] || "").trim() !== "");
+  ROWS = rows.filter(r => {
+    const st = String(r[C.status] || "").trim().toLowerCase();
+    if (IGNORED.has(st)) return false;
+    return (r[C.phone] || "").trim() !== "" || (r[C.tgId] || "").trim() !== "";
+  });
   renderStats();
 }
 
+function normText(t) {
+  return String(t || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+function groupEntities(ents) {
+  // ents: [{fb, name, acc, phones:[]}] → index group များ (union-find)
+  const parent = ents.map((_, i) => i);
+  const find = x => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+  const keyToIdx = {};
+  ents.forEach((r, idx) => {
+    const keys = new Set();
+    [["facebook", r.fb], ["name", r.name], ["acc_name", r.acc]].forEach(([fld, val]) => {
+      const v = normText(val);
+      if (v.length >= 2) keys.add(fld + ":" + v);
+    });
+    (r.phones || []).forEach(ph => keys.add("phone:" + ph));
+    keys.forEach(k => {
+      if (k in keyToIdx) { const ra = find(idx), rb = find(keyToIdx[k]); if (ra !== rb) parent[rb] = ra; }
+      else keyToIdx[k] = idx;
+    });
+  });
+  const groups = {};
+  ents.forEach((_, idx) => {
+    const root = find(idx);
+    (groups[root] = groups[root] || []).push(idx);
+  });
+  return Object.values(groups);
+}
 function isVerified(r) {
   return String(r[C.status] || "").trim().toLowerCase() === "verified";
 }
 
 function renderStats() {
-  const total = ROWS.length;
-  const ver = ROWS.filter(isVerified);
-  const pend = total - ver.length;
-  const lossV = ver.reduce((s, r) => s + (parseFloat(String(r[C.loss]).replace(/[^\d.]/g, "")) || 0), 0);
-  const lossP = ROWS.filter(r => !isVerified(r))
-    .reduce((s, r) => s + (parseFloat(String(r[C.loss]).replace(/[^\d.]/g, "")) || 0), 0);
+  const ents = ROWS.map(r => ({
+    fb: r[C.facebook], name: r[C.name], acc: r[C.accName],
+    phones: rowPhones(r), verified: isVerified(r),
+    loss: parseFloat(String(r[C.loss]).replace(/[^\d.]/g, "")) || 0
+  }));
+  const groups = groupEntities(ents);
+  const total = groups.length;
+  const verCount = groups.filter(g => g.some(i => ents[i].verified)).length;
+  const pend = total - verCount;
+  const lossV = ents.filter(e => e.verified).reduce((s, e) => s + e.loss, 0);
+  const lossP = ents.reduce((s, e) => s + e.loss, 0) - lossV;
   document.getElementById("statsBody").innerHTML =
     `<div class="kv">📝 တိုင်ကြားမှု စုစုပေါင်း: <b>${total}</b></div>` +
-    `<div class="kv">✅ အတည်ပြုပြီး: <b>${ver.length}</b></div>` +
+    `<div class="kv">✅ အတည်ပြုပြီး: <b>${verCount}</b></div>` +
     `<div class="kv">🔍 စစ်ဆေးဆဲ: <b>${pend}</b></div>` +
     `<div class="kv">🔍 စစ်ဆေးဆဲ ဆုံးရှုံးငွေ: <b>${fmtNum(lossP)} MMK</b></div>` +
     `<div class="kv">✔️ အတည်ပြုပြီး ဆုံးရှုံးငွေ: <b>${fmtNum(lossV)} MMK</b></div>`;
@@ -141,15 +178,13 @@ function renderResult(q) {
       <span class="muted">မှတ်တမ်း မရှိတာဟာ လုံးဝ စိတ်ချရတယ်လို့ မဆိုလိုပါ — သတိထားဆက်ဆံပါ။</span></p></div>`;
     return;
   }
-  // entity အလိုက် စု (bot ရဲ့ _group_entities ကို ရိုးရှင်းစွာ)
-  const groups = [];
-  m.hits.forEach(r => {
-    const key = [r[C.facebook], r[C.name], r[C.accName]].map(s => (s || "").trim().toLowerCase()).join("|");
-    let g = groups.find(g => g.key === key);
-    if (!g) { g = { key, rows: [] }; groups.push(g); }
-    g.rows.push(r);
-  });
-  box.innerHTML = groups.map(g => renderGroup(m.label, g.rows)).join("");
+  // entity အလိုက် စု (bot နဲ့ အတူတူ union-find)
+  const ents = m.hits.map(r => ({
+    fb: r[C.facebook], name: r[C.name], acc: r[C.accName],
+    phones: rowPhones(r), row: r
+  }));
+  const groups = groupEntities(ents);
+  box.innerHTML = groups.map(g => renderGroup(m.label, g.map(i => ents[i].row))).join("");
 }
 
 function renderGroup(label, rows) {
