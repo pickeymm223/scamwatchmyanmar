@@ -26,8 +26,8 @@ const C = {
 };
 function normCcy(v) {
   const u = String(v || "").trim().toUpperCase();
-  if (u.includes("USDT")) return "USDT";
-  if (u.includes("USD") || u === "$") return "USD";
+  if (/\bTHB\b/.test(u) || u.includes("BAHT") || u === "฿") return "THB";
+  if (/\bUSD\b/.test(u) || u === "$") return "USD";
   return "MMK";
 }
 function fmtLossTotals(byCcy) {
