@@ -18,6 +18,7 @@
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+section[id] { scroll-margin-top: 66px; }
 body {
   margin: 0;
   font-family: "Myanmar Text", "Noto Sans Myanmar", system-ui, -apple-system, sans-serif;
