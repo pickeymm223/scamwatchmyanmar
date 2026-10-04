@@ -21,8 +21,20 @@ function logWebSearch(type, hit) { logWebStats(type, hit ? "hit" : "miss"); }
 const C = {
   phone: 2, name: 3, facebook: 4, telegram: 5,
   scamType: 6, payType: 7, accName: 8, bankAcct: 9,
-  story: 10, loss: 12, viber: 17, otherPhones: 20, tgId: 21, status: 22, tgUrl: 23
+  story: 10, loss: 12, viber: 17, otherPhones: 20, tgId: 21, status: 22, tgUrl: 23,
+  ccy: 24  // "ငွေကြေးအမျိုးအစား" — header lookup updates this
 };
+function normCcy(v) {
+  const u = String(v || "").trim().toUpperCase();
+  if (u.includes("USDT")) return "USDT";
+  if (u.includes("USD") || u === "$") return "USD";
+  return "MMK";
+}
+function fmtLossTotals(byCcy) {
+  const parts = Object.entries(byCcy).filter(([, a]) => a > 0)
+    .map(([c, a]) => fmtNum(a) + " " + c);
+  return parts.length ? parts.join(" · ") : "0 MMK";
+}
 
 let ROWS = [];
 const IGNORED = new Set(["merged", "duplicate", "rejected"]);
@@ -115,7 +127,11 @@ async function loadData() {
   const res = await fetch(CSV_URL);
   if (!res.ok) throw new Error("HTTP " + res.status);
   const text = await res.text();
-  const rows = parseCSV(text).slice(1); // header ဖြုတ်
+  const parsed = parseCSV(text);
+  const hdr = (parsed[0] || []).map(h => String(h || "").trim());
+  const ci = hdr.indexOf("ငွေကြေးအမျိုးအစား");
+  if (ci >= 0) C.ccy = ci;
+  const rows = parsed.slice(1); // header ဖြုတ်
   ROWS = rows.filter(r => {
     const st = String(r[C.status] || "").trim().toLowerCase();
     if (IGNORED.has(st)) return false;
@@ -162,25 +178,31 @@ function renderStats() {
   const ents = ROWS.map(r => ({
     fb: r[C.facebook], name: r[C.name], acc: r[C.accName],
     phones: rowPhones(r), verified: isVerified(r),
-    loss: parseFloat(String(r[C.loss]).replace(/[^\d.]/g, "")) || 0
+    loss: parseFloat(String(r[C.loss]).replace(/[^\d.]/g, "")) || 0,
+    ccy: normCcy(r[C.ccy])
   }));
   const groups = groupEntities(ents);
   const total = groups.length;
   const verCount = groups.filter(g => g.some(i => ents[i].verified)).length;
   const pend = total - verCount;
-  const lossV = ents.filter(e => e.verified).reduce((s, e) => s + e.loss, 0);
-  const lossP = ents.reduce((s, e) => s + e.loss, 0) - lossV;
+  const sumCcy = list => {
+    const o = {};
+    list.forEach(e => { const c = e.ccy || "MMK"; o[c] = (o[c] || 0) + e.loss; });
+    return o;
+  };
+  const lossVccy = sumCcy(ents.filter(e => e.verified));
+  const lossPccy = sumCcy(ents.filter(e => !e.verified));
   const cards = [
     [total, t("stat_reports")],
     [verCount, t("stat_verified")],
     [pend, t("stat_pending")],
-    [fmtNum(lossV) + " MMK", t("stat_loss")],
+    [fmtLossTotals(lossVccy), t("stat_loss")],
   ];
   document.getElementById("statsBody").innerHTML = cards.map(([n, l]) =>
     `<div class="stat"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`
   ).join("");
   const ll = document.getElementById("lossLine");
-  if (ll) ll.textContent = t("loss_line").replace("{p}", fmtNum(lossP)).replace("{v}", fmtNum(lossV));
+  if (ll) ll.textContent = t("loss_line").replace("{p}", fmtLossTotals(lossPccy)).replace("{v}", fmtLossTotals(lossVccy));
 }
 
 
@@ -250,7 +272,12 @@ function renderGroup(label, rows) {
     const acc = (r[C.accName] || "").trim(), pt = (r[C.payType] || "").trim();
     return acc ? `${acc}${pt ? " (" + pt + ")" : ""}` : "";
   }).filter(Boolean))];
-  const loss = rows.reduce((s, r) => s + (parseFloat(String(r[C.loss]).replace(/[^\d.]/g, "")) || 0), 0);
+  const lossByCcy = {};
+  rows.forEach(r => {
+    const c = normCcy(r[C.ccy]);
+    lossByCcy[c] = (lossByCcy[c] || 0) + (parseFloat(String(r[C.loss]).replace(/[^\d.]/g, "")) || 0);
+  });
+  const lossStr = fmtLossTotals(lossByCcy);
   const types = [...new Set(rows.map(r => r[C.scamType]).filter(Boolean))];
   const tgIds = [...new Set(rows.map(r => String(r[C.tgId] || "").trim()).filter(Boolean))];
 
@@ -274,7 +301,7 @@ function renderGroup(label, rows) {
       ${row(t("lbl_tgid"), tgIds.map(esc).join(", "))}
       ${row(t("lbl_pay"), payLines.map(esc).join("; "))}
       ${row(t("lbl_type"), esc(types.join(", ")))}
-      ${row(t("lbl_loss"), loss ? fmtNum(loss) + " MMK" : "")}
+      ${row(t("lbl_loss"), lossStr !== "0 MMK" ? lossStr : "")}
     </div>
     ${descs.map(d => `<div class="story"><b>${t("story_h")}</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
     ${tgUrls.length ? `<a class="readmore" href="${esc(tgUrls[0])}" target="_blank" rel="noopener">${t("readmore")}</a>` : ""}
