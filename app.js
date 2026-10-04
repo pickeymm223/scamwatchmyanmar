@@ -44,6 +44,7 @@ const HDR_MAP = [
   ["tgUrl", ["Telegraph"]],
   ["ccy", ["ငွေကြေးအမျိုးအစား", "Currency"]],
   ["othPh", ["📱 အခြားဖုန်းနံပါတ်များ"]],
+  ["payOther", ["✏️ အခြား — ငွေပေးချေမှုအမျိုးအစား"]],
 ];
 function resolveColumns(hdr) {
   const clean = hdr.map(h => String(h || "").trim());
@@ -55,10 +56,42 @@ function resolveColumns(hdr) {
   });
 }
 function normCcy(v) {
+  // data-driven: any 3-letter code — no code change needed for new currencies
   const u = String(v || "").trim().toUpperCase();
-  if (/\bTHB\b/.test(u) || u.includes("BAHT") || u === "฿") return "THB";
-  if (/\bUSD\b/.test(u) || u === "$") return "USD";
+  const m = u.match(/\b([A-Z]{3,4})\b/);
+  if (m) return m[1];
+  if (u === "$") return "USD";
+  if (u === "฿" || u.includes("BAHT")) return "THB";
   return "MMK";
+}
+/* Payment logos — data-driven: only shows logos for payment types in the reports */
+const PAY_LOGOS = [
+  [/kbz\s*pay/i, "logos/kbzpay.png", "KBZPay"],
+  [/wave/i, "logos/wavepay.jpg", "WavePay"],
+  [/kbz\s*bank/i, "logos/kbzbank.png", "KBZ Bank"],
+  [/binance/i, "logos/binance.png", "Binance"],
+];
+function renderPayLogos() {
+  const grid = document.getElementById("payGrid");
+  if (!grid) return;
+  const seen = new Set();
+  ROWS.forEach(r => {
+    String(r[C.payType] || "").split(",").forEach(p => {
+      p = p.trim();
+      if (p && p !== "အခြား") seen.add(p);
+    });
+    const po = String(r[C.payOther] || "").trim();
+    if (po) seen.add(po);
+  });
+  const items = [];
+  PAY_LOGOS.forEach(([re, logo, name]) => {
+    for (const p of seen) {
+      if (re.test(p)) { items.push([logo, name]); break; }
+    }
+  });
+  grid.innerHTML = items.map(([logo, name]) =>
+    `<div class="pay-logo"><img src="${logo}" alt="${esc(name)}" loading="lazy"></div>`
+  ).join("");
 }
 function fmtLossTotals(byCcy) {
   const parts = Object.entries(byCcy).filter(([, a]) => a > 0)
@@ -238,6 +271,7 @@ function renderStats() {
   document.getElementById("statsBody").innerHTML = cards.map(([n, l]) =>
     `<div class="stat"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`
   ).join("");
+  renderPayLogos();
   const ll = document.getElementById("lossLine");
   if (ll) ll.textContent = t("loss_line").replace("{p}", fmtLossTotals(lossPccy)).replace("{v}", fmtLossTotals(lossVccy));
 }
