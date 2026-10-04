@@ -228,7 +228,8 @@ function renderResult(q) {
     box.innerHTML = `<div class="rcard ok">
       <div class="rhead"><span class="badge ok">✅ မှတ်တမ်း မတွေ့ပါ</span></div>
       <div class="rtitle">${esc(m.label)}</div>
-      <p class="rnote">ဒီအချက်အလက်နဲ့ ပတ်သက်တဲ့ တိုင်ကြားချက် မရှိသေးပါ။<br>မှတ်တမ်း မရှိတာဟာ လုံးဝ စိတ်ချရတယ်လို့ မဆိုလိုပါ — သတိထားဆက်ဆံပါ။</p></div>`;
+      <p class="rnote">လူကြီးမင်း စစ်ဆေးသော အကောင့်နံပတ်မှာ လိမ်လည်သူဖြစ်ကြောင်း ပေးပို့လက်ခံထားခြင်း မရှိပါ။</p>
+      <p class="rnote">အကယ်၍ လူကြီးမင်း စစ်ဆေးသော အကောင့်နံပတ်မှာ လိမ်လည်သူဖြစ်ပါက ငွေကြေးလိမ်လည်ခံရမှု အန္တရာယ်မှ ကာကွယ်နိုင်ရန် Form မှတစ်ဆင့် ဖြည့်သွင်းပေးပို့ပေးပါရန် မေတ္တာရပ်ခံအပ်ပါသည်။</p></div>`;
     return;
   }
   // entity အလိုက် စု (bot နဲ့ အတူတူ union-find)
@@ -257,8 +258,8 @@ function renderGroup(label, rows) {
     return `<div class="rcard warn">
       <div class="rhead"><span class="badge warn">🔍 စစ်ဆေးဆဲ</span></div>
       <div class="rtitle">${esc(label)}</div>
-      <p class="rnote">ဒီအချက်အလက်ကို တိုင်ကြားခံထားရပြီး <b>စစ်ဆေးနေဆဲဖြစ်ပါတယ်</b>။<br>သတိထားဆက်ဆံပါ။</p>
-      <p class="rnote">အယူခံဝင်ရန်: Telegram Bot မှာ "admin" လို့ ရိုက်ပါ / scamwatchmyanmar@gmail.com</p></div>`;
+      <p class="rnote">လူကြီးမင်း စစ်ဆေးနေသော အကောင့်နံပတ်သည် လိမ်လည်သူဖြစ်ကြောင်း ပေးပို့တိုင်ကြားထားပါသဖြင့် အရောင်းအဝယ် ပြုလုပ်ရန် မသင့်တော်ပါကြောင်း အသိပေးအပ်ပါသည်။</p>
+      <p class="rnote">ယခုဖော်ပြချက်မှာ မှန်ကန်မှုမရှိပါက ပြန်လည်စစ်ဆေးပေးရန် Telegram Bot မှာ "admin" လို့ ရိုက်ပို့ခြင်း (သို့) Gmail: scamwatchmyanmar@gmail.com သို့ ပေးပို့နိုင်ပါသည်။</p></div>`;
   }
   const descs = [...new Set(rows.map(r => r[C.story]).filter(Boolean))];
   const tgUrls = [...new Set(rows.map(r => (r[C.tgUrl] || "").trim()).filter(Boolean))];
@@ -278,6 +279,8 @@ function renderGroup(label, rows) {
     ${descs.map(d => `<div class="story"><b>ဖြစ်စဉ် အကျဉ်းချုပ်</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
     ${tgUrls.length ? `<a class="readmore" href="${esc(tgUrls[0])}" target="_blank" rel="noopener">📖 အပြည့်အစုံဖတ်ရန်</a>` : ""}
     <p class="rnote">⛔ ဒီအချက်အလက်နဲ့ ဆက်သွယ်မှု / ငွေလွှဲ မလုပ်ပါနဲ့။</p>
+    <p class="rnote">📝 <b>မှတ်ချက်:</b> လူကြီးမင်း စစ်ဆေးနေသော အကောင့်နံပတ်သည် လိမ်လည်သူဖြစ်ကြောင်း ပေးပို့တိုင်ကြားထားပါသဖြင့် အရောင်းအဝယ် ပြုလုပ်ရန် မသင့်တော်ပါကြောင်း အသိပေးအပ်ပါသည်။</p>
+    <p class="rnote">ယခုဖော်ပြချက်မှာ မှန်ကန်မှုမရှိပါက ပြန်လည်စစ်ဆေးပေးရန် Telegram Bot မှာ "admin" လို့ ရိုက်ပို့ခြင်း (သို့) Gmail: scamwatchmyanmar@gmail.com သို့ ပေးပို့နိုင်ပါသည်။</p>
   </div>`;
 }
 
