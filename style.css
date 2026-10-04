@@ -70,6 +70,24 @@ a { color: var(--navy2); }
   .pay-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ---------- payment scam stats ---------- */
+.paystat-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid #f1f5f9;
+}
+.paystat-row:last-child { border-bottom: none; }
+.paystat-medal { font-size: 18px; min-width: 32px; text-align: center; }
+.paystat-logo {
+  width: 72px; height: 40px; display: flex; align-items: center; justify-content: center;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px;
+  flex-shrink: 0;
+}
+.paystat-logo img { max-width: 100%; max-height: 30px; object-fit: contain; }
+.paystat-name { font-size: 13px; }
+.paystat-bar-wrap { flex: 1; height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
+.paystat-bar { height: 100%; background: linear-gradient(90deg, #ef4444, #f59e0b); border-radius: 5px; }
+.paystat-count { font-weight: bold; min-width: 28px; text-align: right; }
+
 /* ---------- hero ---------- */
 .hero {
   background: linear-gradient(160deg, var(--navy) 0%, var(--navy2) 100%);
