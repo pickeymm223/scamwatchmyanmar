@@ -190,7 +190,7 @@ document.getElementById("searchForm").addEventListener("submit", e => {
   e.preventDefault();
   const q = document.getElementById("q").value;
   document.getElementById("result").innerHTML = `<p class="muted">⏳ စစ်ဆေးနေပါတယ်...</p>`;
-  setTimeout(() => renderResult(q), 50);
+  setTimeout(() => renderResult(q), 1200);
 });
 
 loadData().catch(() => {
