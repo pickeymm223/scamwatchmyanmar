@@ -213,9 +213,8 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-ph]").forEach(el => {
     el.placeholder = t(el.getAttribute("data-i18n-ph"));
   });
-  document.querySelectorAll(".langsw button").forEach(b => {
-    b.classList.toggle("active", b.dataset.lang === LANG);
-  });
+  const _sel = document.querySelector(".langsel");
+  if (_sel) _sel.value = LANG;
   if (I18N[LANG].title) document.title = t("title");
   const md = document.querySelector('meta[name="description"]');
   if (md && I18N[LANG].meta_desc) md.setAttribute("content", t("meta_desc"));
@@ -235,8 +234,10 @@ function setLang(l) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".langsw button").forEach(b => {
-    b.addEventListener("click", () => setLang(b.dataset.lang));
-  });
+  const _sel = document.querySelector(".langsel");
+  if (_sel) {
+    _sel.value = LANG;
+    _sel.addEventListener("change", () => setLang(_sel.value));
+  }
   applyLang();
 });
