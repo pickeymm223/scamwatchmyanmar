@@ -18,12 +18,41 @@ function logWebStats(type, result) {
 function logWebSearch(type, hit) { logWebStats(type, hit ? "hit" : "miss"); }
 
 // Column indexes (Google Form → Sheet)
+// Column indexes resolved from CSV header row (robust against new Form questions).
+// Falls back to legacy hardcoded positions if a header is missing.
 const C = {
   phone: 2, name: 3, facebook: 4, telegram: 5,
   scamType: 6, payType: 7, accName: 8, bankAcct: 9,
   story: 10, loss: 12, viber: 17, otherPhones: 20, tgId: 21, status: 22, tgUrl: 23,
-  ccy: 24  // "ငွေကြေးအမျိုးအစား" — header lookup updates this
+  ccy: 24
 };
+const HDR_MAP = [
+  ["phone", ["ဖုန်း"]],
+  ["name", ["နာမည်"]],
+  ["facebook", ["Facebook"]],
+  ["telegram", ["Telegram"]],
+  ["scamType", ["လိမ်နည်းအမျိုးအစား"]],
+  ["payType", ["ငွေပေးချေမှုအမျိုးအစား"]],
+  ["accName", ["လက်ခံသူအကောင့်နာမည်"]],
+  ["bankAcct", ["ဘဏ်အကောင့်"]],
+  ["story", ["ဖြစ်စဉ်"]],
+  ["loss", ["ဆုံးရှုံးငွေ"]],
+  ["viber", ["Viber"]],
+  ["otherPhones", ["📱 အခြားဖုန်းနံပါတ်များ"]],
+  ["tgId", ["🆔 Telegram ID"]],
+  ["status", ["status"]],
+  ["tgUrl", ["Telegraph"]],
+  ["ccy", ["ငွေကြေးအမျိုးအစား", "Currency"]],
+];
+function resolveColumns(hdr) {
+  const clean = hdr.map(h => String(h || "").trim());
+  HDR_MAP.forEach(([key, names]) => {
+    for (const n of names) {
+      const i = clean.indexOf(n);
+      if (i >= 0) { C[key] = i; break; }
+    }
+  });
+}
 function normCcy(v) {
   const u = String(v || "").trim().toUpperCase();
   if (/\bTHB\b/.test(u) || u.includes("BAHT") || u === "฿") return "THB";
@@ -128,9 +157,7 @@ async function loadData() {
   if (!res.ok) throw new Error("HTTP " + res.status);
   const text = await res.text();
   const parsed = parseCSV(text);
-  const hdr = (parsed[0] || []).map(h => String(h || "").trim());
-  const ci = hdr.indexOf("ငွေကြေးအမျိုးအစား");
-  if (ci >= 0) C.ccy = ci;
+  resolveColumns(parsed[0] || []);
   const rows = parsed.slice(1); // header ဖြုတ်
   ROWS = rows.filter(r => {
     const st = String(r[C.status] || "").trim().toLowerCase();
