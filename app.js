@@ -1,6 +1,21 @@
 /* ScamWatch Myanmar — web checker (GitHub Pages, static) */
 const CSV_URL = "https://docs.google.com/spreadsheets/d/1odYBdPi93Tt3oydiQquhyoTRzaeao0hyIoMv7Luv6xE/export?format=csv&gid=1156714479";
 
+/* Web search stats beacon (admin only viewing via bot /admin).
+   WEB_STATS_URL = Google Apps Script web app URL; empty = disabled.
+   Only logs search type + hit/miss — never the query value. */
+const WEB_STATS_URL = "";
+function logWebSearch(type, hit) {
+  if (!WEB_STATS_URL) return;
+  try {
+    fetch(WEB_STATS_URL, {
+      method: "POST", mode: "no-cors",
+      headers: {"Content-Type": "text/plain"},
+      body: JSON.stringify({type: type, hit: !!hit})
+    });
+  } catch (e) {}
+}
+
 // Column indexes (Google Form → Sheet)
 const C = {
   phone: 2, name: 3, facebook: 4, telegram: 5,
@@ -201,6 +216,10 @@ function renderResult(q) {
       <p class="rnote">ဖုန်းနံပါတ် / Telegram ID / ဘဏ်အကောင့်နံပါတ် ထည့်ပေးပါ<br>ဥပမာ: 09123456789</p></div>`;
     return;
   }
+  // stats beacon: type from label icon, hit/miss only (no query value)
+  const st = m.label.startsWith("📱") ? "phone"
+    : m.label.startsWith("🆔") ? "tg_id" : "bank";
+  logWebSearch(st, m.hits.length > 0);
   if (!m.hits.length) {
     box.innerHTML = `<div class="rcard ok">
       <div class="rhead"><span class="badge ok">✅ မှတ်တမ်း မတွေ့ပါ</span></div>
