@@ -89,7 +89,7 @@ a { color: var(--navy2); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .rcard {
-  background: var(--card); border-radius: var(--radius);
+  background: var(--card); color: var(--ink); border-radius: var(--radius);
   box-shadow: var(--shadow);
   border-top: 5px solid var(--muted);
   padding: 18px; margin-bottom: 14px;
