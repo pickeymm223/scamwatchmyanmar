@@ -88,6 +88,23 @@ a { color: var(--navy2); }
 .paystat-bar { height: 100%; background: linear-gradient(90deg, #ef4444, #f59e0b); border-radius: 5px; }
 .paystat-count { font-weight: bold; min-width: 28px; text-align: right; }
 
+/* ---------- disclaimer ticker ---------- */
+.ticker {
+  overflow: hidden; white-space: nowrap;
+  background: #fef3c7; border-top: 1px solid #fde68a; border-bottom: 1px solid #fde68a;
+  color: #92400e; font-size: 14px; padding: 8px 0;
+}
+.ticker-inner { display: inline-block; padding-left: 100%; animation: ticker-scroll 40s linear infinite; }
+.ticker-inner span { padding-right: 60px; }
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-inner { animation: none; padding-left: 0; white-space: normal; }
+  .ticker { white-space: normal; padding: 8px 12px; }
+}
+
 /* ---------- hero ---------- */
 .hero {
   background: linear-gradient(160deg, var(--navy) 0%, var(--navy2) 100%);
