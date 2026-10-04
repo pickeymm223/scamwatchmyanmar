@@ -171,16 +171,16 @@ function renderStats() {
   const lossV = ents.filter(e => e.verified).reduce((s, e) => s + e.loss, 0);
   const lossP = ents.reduce((s, e) => s + e.loss, 0) - lossV;
   const cards = [
-    [total, "\uD83D\uDCDD တိုင်ကြားမှု"],
-    [verCount, "✅ အတည်ပြုပြီး"],
-    [pend, "\uD83D\uDD0D စစ်ဆေးဆဲ"],
-    [fmtNum(lossV) + " MMK", "\uD83D\uDCB8 အတည်ပြုပြီး ဆုံးရှုံးငွေ"],
+    [total, t("stat_reports")],
+    [verCount, t("stat_verified")],
+    [pend, t("stat_pending")],
+    [fmtNum(lossV) + " MMK", t("stat_loss")],
   ];
   document.getElementById("statsBody").innerHTML = cards.map(([n, l]) =>
     `<div class="stat"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`
   ).join("");
   const ll = document.getElementById("lossLine");
-  if (ll) ll.textContent = `စစ်ဆေးဆဲ: ${fmtNum(lossP)} MMK · အတည်ပြုပြီး: ${fmtNum(lossV)} MMK`;
+  if (ll) ll.textContent = t("loss_line").replace("{p}", fmtNum(lossP)).replace("{v}", fmtNum(lossV));
 }
 
 
@@ -217,7 +217,7 @@ function renderResult(q) {
   const m = findMatches(q);
   if (!m) {
     box.innerHTML = `<div class="rcard warn"><div class="rhead"><span class="badge warn">ℹ️</span></div>
-      <p class="rnote">ဖုန်းနံပါတ် / Telegram ID / ဘဏ်အကောင့်နံပါတ် ထည့်ပေးပါ<br>ဥပမာ: 09123456789</p></div>`;
+      <p class="rnote">${t("invalid_input")}</p></div>`;
     return;
   }
   // stats beacon: type from label icon, hit/miss only (no query value)
@@ -226,10 +226,10 @@ function renderResult(q) {
   logWebSearch(st, m.hits.length > 0);
   if (!m.hits.length) {
     box.innerHTML = `<div class="rcard ok">
-      <div class="rhead"><span class="badge ok">✅ မှတ်တမ်း မတွေ့ပါ</span></div>
+      <div class="rhead"><span class="badge ok">${t("badge_notfound")}</span></div>
       <div class="rtitle">${esc(m.label)}</div>
-      <p class="rnote"><b>လူကြီးမင်း စစ်ဆေးသော အကောင့်နံပတ်မှာ လိမ်လည်သူဖြစ်ကြောင်း ပေးပို့လက်ခံထားခြင်း မရှိပါ။</b></p>
-      <p class="rnote">အကယ်၍ လူကြီးမင်း စစ်ဆေးသော အကောင့်နံပတ်မှာ လိမ်လည်သူဖြစ်ပါက ငွေကြေးလိမ်လည်ခံရမှု အန္တရာယ်မှ ကာကွယ်နိုင်ရန် Form မှတစ်ဆင့် ဖြည့်သွင်းပေးပို့ပေးပါရန် မေတ္တာရပ်ခံအပ်ပါသည်။</p></div>`;
+      <p class="rnote">${t("nf_p1")}</p>
+      <p class="rnote">${t("nf_p2")}</p></div>`;
     return;
   }
   // entity အလိုက် စု (bot နဲ့ အတူတူ union-find)
@@ -256,31 +256,31 @@ function renderGroup(label, rows) {
 
   if (!verified) {
     return `<div class="rcard warn">
-      <div class="rhead"><span class="badge warn">🔍 စစ်ဆေးဆဲ</span></div>
+      <div class="rhead"><span class="badge warn">${t("badge_pending")}</span></div>
       <div class="rtitle">${esc(label)}</div>
-      <p class="rnote"><b>လူကြီးမင်း စစ်ဆေးနေသော အကောင့်နံပတ်သည် လိမ်လည်သူဖြစ်ကြောင်း ပေးပို့တိုင်ကြားထားပါသဖြင့် အရောင်းအဝယ် ပြုလုပ်ရန် မသင့်တော်ပါကြောင်း အသိပေးအပ်ပါသည်။</b></p>
-      <p class="rnote">ယခုဖော်ပြချက်မှာ မှန်ကန်မှုမရှိပါက ပြန်လည်စစ်ဆေးပေးရန် Telegram Bot မှာ "admin" လို့ ရိုက်ပို့ခြင်း (သို့) Gmail: scamwatchmyanmar@gmail.com သို့ ပေးပို့နိုင်ပါသည်။</p></div>`;
+      <p class="rnote">${t("pend_p1")}</p>
+      <p class="rnote">${t("pend_p2")}</p></div>`;
   }
   const descs = [...new Set(rows.map(r => r[C.story]).filter(Boolean))];
   const tgUrls = [...new Set(rows.map(r => (r[C.tgUrl] || "").trim()).filter(Boolean))];
   const row = (k, v) => v ? `<div class="rrow"><span class="k">${k}</span><span class="v">${v}</span></div>` : "";
   return `<div class="rcard danger">
-    <div class="rhead"><span class="badge danger">⚠️ အတည်ပြုပြီး လိမ်လည်မှု</span></div>
+    <div class="rhead"><span class="badge danger">${t("badge_verified")}</span></div>
     <div class="rtitle">${esc(label)}</div>
     <div class="rrows">
-      ${row("နာမည်", esc(names.join(", ")))}
-      ${row("Facebook", esc(fbs.join(", ")))}
-      ${row("ဖုန်း", phones.map(maskPhone).map(esc).join(", "))}
-      ${row("Telegram ID", tgIds.map(esc).join(", "))}
-      ${row("ငွေပေးချေမှု", payLines.map(esc).join("; "))}
-      ${row("လိမ်နည်း", esc(types.join(", ")))}
-      ${row("ဆုံးရှုံးငွေ", loss ? fmtNum(loss) + " MMK" : "")}
+      ${row(t("lbl_name"), esc(names.join(", ")))}
+      ${row(t("lbl_fb"), esc(fbs.join(", ")))}
+      ${row(t("lbl_phone"), phones.map(maskPhone).map(esc).join(", "))}
+      ${row(t("lbl_tgid"), tgIds.map(esc).join(", "))}
+      ${row(t("lbl_pay"), payLines.map(esc).join("; "))}
+      ${row(t("lbl_type"), esc(types.join(", ")))}
+      ${row(t("lbl_loss"), loss ? fmtNum(loss) + " MMK" : "")}
     </div>
-    ${descs.map(d => `<div class="story"><b>ဖြစ်စဉ် အကျဉ်းချုပ်</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
-    ${tgUrls.length ? `<a class="readmore" href="${esc(tgUrls[0])}" target="_blank" rel="noopener">📖 အပြည့်အစုံဖတ်ရန်</a>` : ""}
-    <p class="rnote">⛔ ဒီအချက်အလက်နဲ့ ဆက်သွယ်မှု / ငွေလွှဲ မလုပ်ပါနဲ့။</p>
-    <p class="rnote">📝 <b>မှတ်ချက်:</b> <b>လူကြီးမင်း စစ်ဆေးနေသော အကောင့်နံပတ်သည် လိမ်လည်သူဖြစ်ကြောင်း ပေးပို့တိုင်ကြားထားပါသဖြင့် အရောင်းအဝယ် ပြုလုပ်ရန် မသင့်တော်ပါကြောင်း အသိပေးအပ်ပါသည်။</b></p>
-    <p class="rnote">ယခုဖော်ပြချက်မှာ မှန်ကန်မှုမရှိပါက ပြန်လည်စစ်ဆေးပေးရန် Telegram Bot မှာ "admin" လို့ ရိုက်ပို့ခြင်း (သို့) Gmail: scamwatchmyanmar@gmail.com သို့ ပေးပို့နိုင်ပါသည်။</p>
+    ${descs.map(d => `<div class="story"><b>${t("story_h")}</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
+    ${tgUrls.length ? `<a class="readmore" href="${esc(tgUrls[0])}" target="_blank" rel="noopener">${t("readmore")}</a>` : ""}
+    <p class="rnote">${t("warn_dont")}</p>
+    <p class="rnote">${t("note_label")} ${t("pend_p1")}</p>
+    <p class="rnote">${t("pend_p2")}</p>
   </div>`;
 }
 
@@ -289,13 +289,13 @@ document.getElementById("searchForm").addEventListener("submit", e => {
   e.preventDefault();
   const q = document.getElementById("q").value;
   document.getElementById("result").innerHTML =
-    `<div class="loading"><span class="spinner"></span>စစ်ဆေးနေပါတယ်...</div>`;
+    `<div class="loading"><span class="spinner"></span>${t("loading")}</div>`;
   setTimeout(() => renderResult(q), 1200);
 });
 
 loadData().catch(() => {
   document.getElementById("statsBody").innerHTML =
-    `<p class="muted">⚠️ Data ရယူလို့မရသေးပါ — internet စစ်ပြီး ပြန်ဖွင့်ကြည့်ပါ။</p>`;
+    `<p class="muted">${t("data_error")}</p>`;
 });
 
 // page visit beacon (unique user မဟုတ် — page view အရေအတွက်သာ)
