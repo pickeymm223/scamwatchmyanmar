@@ -55,6 +55,21 @@ a { color: var(--navy2); }
 }
 .langsel option { color: #111; }
 
+/* ---------- payment logos ---------- */
+.pay-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 10px; margin-top: 10px;
+}
+.pay-logo {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 10px; display: flex; align-items: center; justify-content: center;
+  min-height: 64px;
+}
+.pay-logo img { max-width: 100%; max-height: 44px; object-fit: contain; }
+@media (max-width: 480px) {
+  .pay-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ---------- hero ---------- */
 .hero {
   background: linear-gradient(160deg, var(--navy) 0%, var(--navy2) 100%);
