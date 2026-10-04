@@ -5,16 +5,17 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/1odYBdPi93Tt3oydiQquhyoT
    WEB_STATS_URL = Google Apps Script web app URL; empty = disabled.
    Only logs search type + hit/miss — never the query value. */
 const WEB_STATS_URL = "";
-function logWebSearch(type, hit) {
+function logWebStats(type, result) {
   if (!WEB_STATS_URL) return;
   try {
     fetch(WEB_STATS_URL, {
       method: "POST", mode: "no-cors",
       headers: {"Content-Type": "text/plain"},
-      body: JSON.stringify({type: type, hit: !!hit})
+      body: JSON.stringify({type: type, result: result})
     });
   } catch (e) {}
 }
+function logWebSearch(type, hit) { logWebStats(type, hit ? "hit" : "miss"); }
 
 // Column indexes (Google Form → Sheet)
 const C = {
@@ -290,3 +291,6 @@ loadData().catch(() => {
   document.getElementById("statsBody").innerHTML =
     `<p class="muted">⚠️ Data ရယူလို့မရသေးပါ — internet စစ်ပြီး ပြန်ဖွင့်ကြည့်ပါ။</p>`;
 });
+
+// page visit beacon (unique user မဟုတ် — page view အရေအတွက်သာ)
+logWebStats("visit", "-");
