@@ -43,6 +43,7 @@ const HDR_MAP = [
   ["status", ["status"]],
   ["tgUrl", ["Telegraph"]],
   ["ccy", ["ငွေကြေးအမျိုးအစား", "Currency"]],
+  ["othPh", ["📱 အခြားဖုန်းနံပါတ်များ"]],
 ];
 function resolveColumns(hdr) {
   const clean = hdr.map(h => String(h || "").trim());
@@ -112,6 +113,15 @@ function maskAcct(a) {
   const d = String(a || "").replace(/\s/g, "");
   if (d.length >= 6) return d.slice(0, 4) + "****" + d.slice(-2);
   return a;
+}
+function binanceUids(b) {
+  const out = [];
+  const re = /(\d{6,12})\s*\(\s*binance\s*\)/gi;
+  let m;
+  while ((m = re.exec(String(b || "")))) {
+    if (!out.includes(m[1])) out.push(m[1]);
+  }
+  return out;
 }
 function bankDigitsList(b) {
   const out = [];
@@ -250,6 +260,12 @@ function findMatches(q) {
       if (String(r[C.tgId] || "").trim() === digits) hits.push(r);
     });
     if (hits.length) return { label: "\uD83C\uDD94 " + digits, hits };
+    // Binance UID အနေနဲ့ စစ်
+    const uhits = [];
+    ROWS.forEach(r => {
+      if (binanceUids(r[C.othPh]).includes(digits)) uhits.push(r);
+    });
+    if (uhits.length) return { label: "🟡 Binance UID " + digits, hits: uhits };
     // bank account အနေနဲ့လည်း စစ်
     const bhits = [];
     ROWS.forEach(r => {
@@ -271,7 +287,8 @@ function renderResult(q) {
   }
   // stats beacon: type from label icon, hit/miss only (no query value)
   const st = m.label.startsWith("📱") ? "phone"
-    : m.label.startsWith("🆔") ? "tg_id" : "bank";
+    : m.label.startsWith("🆔") ? "tg_id"
+    : m.label.includes("Binance UID") ? "binance" : "bank";
   logWebSearch(st, m.hits.length > 0);
   if (!m.hits.length) {
     box.innerHTML = `<div class="rcard ok">
@@ -326,6 +343,7 @@ function renderGroup(label, rows) {
       ${row(t("lbl_fb"), esc(fbs.join(", ")))}
       ${row(t("lbl_phone"), phones.map(maskPhone).map(esc).join(", "))}
       ${row(t("lbl_tgid"), tgIds.map(esc).join(", "))}
+      ${row("🟡 Binance UID", [...new Set(rows.flatMap(r => binanceUids(r[C.othPh])))].map(esc).join(", "))}
       ${row(t("lbl_pay"), payLines.map(esc).join("; "))}
       ${row(t("lbl_type"), esc(types.join(", ")))}
       ${row(t("lbl_loss"), lossStr !== "0 MMK" ? lossStr : "")}
