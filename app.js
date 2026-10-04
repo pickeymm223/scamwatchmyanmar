@@ -52,9 +52,17 @@ function maskPhonesInText(t) {
   return String(t || "").replace(/\+?9?5?9\d{7,9}|09\d{7,9}/g, m => maskPhone(m));
 }
 function maskAcct(a) {
-  const d = String(a || "").replace(/\D/g, "");
-  if (d.length < 6) return a;
-  return d.slice(0, 3) + "*".repeat(Math.max(0, d.length - 5)) + d.slice(-2);
+  const d = String(a || "").replace(/\s/g, "");
+  if (d.length >= 6) return d.slice(0, 4) + "****" + d.slice(-2);
+  return a;
+}
+function bankDigitsList(b) {
+  const out = [];
+  (String(b || "").match(/\d[\d\s\-]*\d/g) || []).forEach(x => {
+    const d = x.replace(/\D/g, "");
+    if (d.length >= 8 && !out.includes(d)) out.push(d);
+  });
+  return out;
 }
 function summarize(t, per) {
   t = String(t || "");
@@ -163,11 +171,18 @@ function findMatches(q) {
     });
     return { label: "📱 " + maskPhone(ph), hits };
   }
-  if (/^\d{8,12}$/.test(digits) && !digits.startsWith("09")) {
+  if (/^\d{8,}$/.test(digits) && !digits.startsWith("09") && !digits.startsWith("959")) {
     ROWS.forEach(r => {
       if (String(r[C.tgId] || "").trim() === digits) hits.push(r);
     });
-    return { label: "🆔 " + digits, hits };
+    if (hits.length) return { label: "\uD83C\uDD94 " + digits, hits };
+    // bank account အနေနဲ့လည်း စစ်
+    const bhits = [];
+    ROWS.forEach(r => {
+      if (bankDigitsList(r[C.bankAcct]).includes(digits)) bhits.push(r);
+    });
+    if (bhits.length) return { label: "\uD83C\uDFE6 " + maskAcct(digits), hits: bhits };
+    return { label: "\uD83C\uDD94 " + digits, hits: [] };
   }
   return null;
 }
