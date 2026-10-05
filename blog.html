@@ -69,15 +69,17 @@
 </style>
 <script>
 (function(){
+  const API = "https://scamwatch-blog.zawminhtet723.workers.dev";
   const listEl = document.getElementById("blogList");
   const postEl = document.getElementById("blogPost");
   const q = new URLSearchParams(location.search);
   const slug = q.get("p");
   function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
   function labelsHtml(ls){return (ls||[]).map(l=>'<span class="lbl">'+esc(l)+"</span>").join("");}
+  function empty(){ listEl.innerHTML='<p class="muted">ဆောင်းပါးများ မကြာမီ လာမည်…</p>'; }
   if (slug) {
     listEl.style.display = "none"; postEl.style.display = "block";
-    fetch("blog/posts/"+encodeURIComponent(slug)+".json").then(r=>{if(!r.ok)throw 0;return r.json();}).then(p=>{
+    fetch(API+"/api/post/"+encodeURIComponent(slug)).then(r=>{if(!r.ok)throw 0;return r.json();}).then(p=>{
       postEl.innerHTML = '<a href="blog.html" class="back">← ဆောင်းပါးများ</a>'
         + "<h1>"+esc(p.title)+"</h1>"
         + '<div class="post-meta">'+esc(p.date||"")+" "+labelsHtml(p.labels)+"</div>"
@@ -85,15 +87,15 @@
     }).catch(()=>{postEl.innerHTML='<p class="muted">ဆောင်းပါး ရှာမတွေ့ပါ</p><a href="blog.html" class="back">← ပြန်သွား</a>';});
     return;
   }
-  fetch("blog/posts.json").then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
+  fetch(API+"/api/posts").then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
     const posts = (d&&d.posts)||[];
-    if(!posts.length){listEl.innerHTML='<p class="muted">ဆောင်းပါးများ မကြာမီ လာမည်…</p>';return;}
+    if(!posts.length){empty();return;}
     listEl.innerHTML = posts.map(p=>
       '<div class="post-card"><h2><a href="blog.html?p='+encodeURIComponent(p.slug)+'">'+esc(p.title)+"</a></h2>"
       + '<div class="post-meta">'+esc(p.date||"")+" "+labelsHtml(p.labels)+"</div>"
       + '<div class="post-excerpt">'+esc(p.excerpt||"")+"</div></div>"
     ).join("");
-  }).catch(()=>{listEl.innerHTML='<p class="muted">ဆောင်းပါးများ မကြာမီ လာမည်…</p>';});
+  }).catch(empty);
 })();
 </script>
 </main>
