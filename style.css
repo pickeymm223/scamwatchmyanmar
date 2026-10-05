@@ -41,26 +41,32 @@ a { color: var(--navy2); }
 .bar-in { display: flex; align-items: center; justify-content: space-between; height: 56px; }
 .brand { display: inline-flex; align-items: center; text-decoration: none; }
 .logo { height: 30px; width: auto; display: block; }
+
+.menubtn {
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+  color: #fff; font-size: 1rem; font-weight: 700;
+  cursor: pointer; padding: 8px 16px; border-radius: 8px; margin-left: auto;
+}
+.menubtn:hover { background: rgba(255,255,255,.22); }
+.topbar { position: sticky; top: 0; z-index: 10; }
+.topbar nav {
+  display: none; position: absolute; top: 56px; left: 0; right: 0;
+  background: var(--navy); flex-direction: column; padding: 8px 0;
+  box-shadow: 0 8px 16px rgba(0,0,0,.25);
+}
+.topbar nav.open { display: flex; }
 .topbar nav a {
-  color: rgba(255,255,255,.85); text-decoration: none;
-  font-size: .9rem; margin-left: 16px;
+  color: rgba(255,255,255,.9); text-decoration: none;
+  font-size: 1rem; font-weight: 600;
+  margin: 0; padding: 13px 20px; border-top: 1px solid rgba(255,255,255,.1);
 }
-.topbar nav a:hover { color: #fff; }
-.hamburger {
-  display: none; background: none; border: none; color: #fff;
-  font-size: 1.5rem; cursor: pointer; padding: 8px; margin-left: auto;
+.topbar nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+.menu-lang {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 20px; border-top: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.9); font-weight: 600;
 }
-@media (max-width: 640px) {
-  .hamburger { display: block; }
-  .topbar nav {
-    display: none; position: absolute; top: 56px; left: 0; right: 0;
-    background: var(--navy); flex-direction: column; padding: 8px 0;
-    box-shadow: 0 8px 16px rgba(0,0,0,.2);
-  }
-  .topbar nav.open { display: flex; }
-  .topbar nav a { margin: 0; padding: 12px 20px; border-top: 1px solid rgba(255,255,255,.1); }
-  .langsel { margin-left: 8px; }
-}
+.menu-lang .langsel { margin-left: 0; font-size: .9rem; padding: 8px 10px; }
 
 /* ---------- language switcher ---------- */
 .langsel {
@@ -118,6 +124,13 @@ a { color: var(--navy2); }
 /* ---------- bot card ---------- */
 .bot-card { background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd; }
 .bot-card .btn { margin-top: 12px; }
+
+/* ---------- faq ---------- */
+.faq details { border-bottom: 1px solid #f1f5f9; padding: 10px 0; }
+.faq details:last-child { border-bottom: none; }
+.faq summary { font-weight: 700; cursor: pointer; font-size: .95rem; padding: 4px 0; }
+.faq summary:hover { color: var(--navy2); }
+.faq details p { margin: 8px 0 4px; color: #475569; font-size: .9rem; line-height: 1.6; }
 
 /* ---------- how to use ---------- */
 .howto { margin: 0; padding: 0; list-style: none; counter-reset: step; }
