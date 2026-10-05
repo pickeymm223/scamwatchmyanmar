@@ -46,6 +46,21 @@ a { color: var(--navy2); }
   font-size: .9rem; margin-left: 16px;
 }
 .topbar nav a:hover { color: #fff; }
+.hamburger {
+  display: none; background: none; border: none; color: #fff;
+  font-size: 1.5rem; cursor: pointer; padding: 8px; margin-left: auto;
+}
+@media (max-width: 640px) {
+  .hamburger { display: block; }
+  .topbar nav {
+    display: none; position: absolute; top: 56px; left: 0; right: 0;
+    background: var(--navy); flex-direction: column; padding: 8px 0;
+    box-shadow: 0 8px 16px rgba(0,0,0,.2);
+  }
+  .topbar nav.open { display: flex; }
+  .topbar nav a { margin: 0; padding: 12px 20px; border-top: 1px solid rgba(255,255,255,.1); }
+  .langsel { margin-left: 8px; }
+}
 
 /* ---------- language switcher ---------- */
 .langsel {
@@ -83,10 +98,39 @@ a { color: var(--navy2); }
   flex-shrink: 0;
 }
 .paystat-logo img { max-width: 100%; max-height: 30px; object-fit: contain; }
-.paystat-name { font-size: 13px; }
+.paystat-mid { flex: 1; min-width: 0; }
+.paystat-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pay-name { font-size: 11px; line-height: 1.2; text-align: center; }
 .paystat-bar-wrap { flex: 1; height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
 .paystat-bar { height: 100%; background: linear-gradient(90deg, #ef4444, #f59e0b); border-radius: 5px; }
 .paystat-count { font-weight: bold; min-width: 28px; text-align: right; }
+
+/* ---------- scam types ---------- */
+.type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.type-card {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 16px 12px; text-align: center;
+}
+.type-ico { font-size: 1.8rem; margin-bottom: 6px; }
+.type-card b { display: block; font-size: .92rem; margin-bottom: 4px; }
+.type-card span { font-size: .8rem; color: #475569; line-height: 1.4; }
+
+/* ---------- how to use ---------- */
+.howto { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.howto li {
+  counter-increment: step; position: relative;
+  padding: 10px 0 10px 52px; border-bottom: 1px solid #f1f5f9;
+}
+.howto li:last-child { border-bottom: none; }
+.howto li::before {
+  content: counter(step); position: absolute; left: 0; top: 10px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--navy); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1rem;
+}
+.howto li b { display: block; font-size: .98rem; margin-bottom: 2px; }
+.howto li span { font-size: .88rem; color: #475569; }
 
 /* ---------- FB alerts ---------- */
 .fb-item { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
@@ -124,18 +168,28 @@ a { color: var(--navy2); }
 .searchbox { display: flex; gap: 10px; }
 .searchbox input {
   flex: 1; min-width: 0;
-  padding: 15px 16px; font-size: 1rem;
+  padding: 17px 18px; font-size: 1.05rem;
   border: 2px solid transparent; border-radius: 14px;
   background: #fff; color: var(--ink);
 }
 .searchbox input:focus { outline: none; border-color: #93c5fd; }
 .searchbox button {
-  padding: 0 22px; font-size: 1rem; font-weight: 700;
+  padding: 0 28px; font-size: 1.1rem; font-weight: 800;
   border: none; border-radius: 14px; cursor: pointer;
   background: #fbbf24; color: #451a03;
-  white-space: nowrap;
+  white-space: nowrap; min-height: 56px;
+  box-shadow: 0 4px 14px rgba(251,191,36,.4);
   transition: transform .08s ease, background .15s ease;
 }
+.hero-cta { margin-top: 20px; text-align: center; }
+.hero-cta p { margin: 0 0 10px; opacity: .92; font-size: .95rem; }
+.hero-cta .btn-report {
+  display: inline-block; background: rgba(255,255,255,.15);
+  border: 2px solid rgba(255,255,255,.5); color: #fff;
+  padding: 12px 28px; border-radius: 12px; font-weight: 700;
+  text-decoration: none; font-size: 1rem;
+}
+.hero-cta .btn-report:hover { background: rgba(255,255,255,.25); }
 .searchbox button:hover { background: #f59e0b; }
 .searchbox button:active { transform: scale(.97); }
 
@@ -208,7 +262,7 @@ a { color: var(--navy2); }
   padding: 16px 14px; text-align: center;
 }
 .stat-num { font-size: 1.65rem; font-weight: 800; color: var(--navy); line-height: 1.2; }
-.stat-label { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+.stat-label { font-size: .85rem; color: #475569; font-weight: 600; margin-top: 6px; line-height: 1.35; }
 .stats .fine { text-align: center; margin: 10px 0 0; }
 
 /* ---------- cards / footer ---------- */
