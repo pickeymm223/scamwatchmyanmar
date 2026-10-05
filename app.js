@@ -45,6 +45,8 @@ const HDR_MAP = [
   ["ccy", ["ငွေကြေးအမျိုးအစား", "Currency"]],
   ["othPh", ["📱 အခြားဖုန်းနံပါတ်များ"]],
   ["payOther", ["✏️ အခြား — ငွေပေးချေမှုအမျိုးအစား"]],
+  ["socialEx", ["Social Media  & Exchange"]],
+  ["payDetail", ["ငွေပေးချေမှုအသေးစိတ်", "Pay အမျိုးစား"]],
 ];
 function resolveColumns(hdr) {
   const clean = hdr.map(h => String(h || "").trim());
@@ -483,6 +485,26 @@ function renderGroup(label, rows, similar) {
   const names = [...new Set(rows.map(r => r[C.name]).filter(Boolean))];
   const fbs = [...new Set(rows.map(r => r[C.facebook]).filter(Boolean))];
   const phones = [...new Set(rows.flatMap(rowPhones))];
+  // Parse structured social/payment fields
+  function parseStructured(text) {
+    const out = {};
+    String(text || "").split("\n").forEach(line => {
+      const m = line.match(/^\s*([^:]+?)\s*:\s*(.+?)\s*$/);
+      if (m && m[1].trim() && m[2].trim()) {
+        const k = m[1].trim();
+        (out[k] = out[k] || []).push(m[2].trim());
+      }
+    });
+    return out;
+  }
+  const socialAll = {};
+  const payAll = {};
+  rows.forEach(r => {
+    const s = parseStructured(r[C.socialEx]);
+    for (const [k, v] of Object.entries(s)) (socialAll[k] = socialAll[k] || []).push(...v);
+    const p = parseStructured(r[C.payDetail]);
+    for (const [k, v] of Object.entries(p)) (payAll[k] = payAll[k] || []).push(...v);
+  });
   const payLines = [...new Set(rows.map(r => {
     const acc = (r[C.accName] || "").trim(), pt = (r[C.payType] || "").trim();
     return acc ? `${acc}${pt ? " (" + pt + ")" : ""}` : "";
@@ -506,16 +528,23 @@ function renderGroup(label, rows, similar) {
   const descs = [...new Set(rows.map(r => r[C.story]).filter(Boolean))];
   const tgUrls = [...new Set(rows.map(r => (r[C.tgUrl] || "").trim()).filter(Boolean))];
   const row = (k, v) => v ? `<div class="rrow"><span class="k">${k}</span><span class="v">${v}</span></div>` : "";
+  const platIcons = { Facebook: "📘", Telegram: "✈️", Viber: "📞", Binance: "🟡", Bitget: "🔵" };
+  const socialRows = Object.entries(socialAll).map(([plat, vals]) =>
+    row(`${platIcons[plat] || "🔗"} ${plat}`, [...new Set(vals)].map(esc).join(", "))).join("");
+  const payRows = Object.entries(payAll).map(([method, accts]) =>
+    row(`💳 ${esc(method)}`, [...new Set(accts)].map(a =>
+      /\d{7,}/.test(a) ? esc(a.replace(/(\d{3})\d+(\d{2})/, "$1******$2")) : esc(a)
+    ).join("; "))).join("");
   return `<div class="rcard danger">
     <div class="rhead"><span class="badge danger">${t("badge_verified")}</span></div>
     <div class="rtitle">${esc(label)}</div>
     <div class="rrows">
       ${row(t("lbl_name"), esc(names.join(", ")))}
-      ${row(t("lbl_fb"), esc(fbs.join(", ")))}
+      ${socialRows || row(t("lbl_fb"), esc(fbs.join(", ")))}
       ${row(t("lbl_phone"), phones.map(maskPhone).map(esc).join(", "))}
       ${row(t("lbl_tgid"), tgIds.map(esc).join(", "))}
       ${row("🟡 Binance UID", [...new Set(rows.flatMap(r => binanceUids(r[C.othPh])))].map(esc).join(", "))}
-      ${row(t("lbl_pay"), payLines.map(esc).join("; "))}
+      ${payRows || row(t("lbl_pay"), payLines.map(esc).join("; "))}
       ${row(t("lbl_type"), esc(types.join(", ")))}
       ${row(t("lbl_loss"), lossStr !== "0 MMK" ? lossStr : "")}
     </div>
