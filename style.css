@@ -169,6 +169,14 @@ a { color: var(--navy2); }
 }
 .hero h1 { margin: 0 0 10px; font-size: 1.9rem; line-height: 1.45; letter-spacing: -.01em; }
 .lede { margin: 0 0 22px; opacity: .88; font-size: 1rem; max-width: 34em; }
+.search-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.chip {
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.35);
+  color: #fff; border-radius: 999px; padding: 7px 14px;
+  font-size: .85rem; cursor: pointer; font-weight: 600;
+}
+.chip:hover { background: rgba(255,255,255,.28); }
+.chip:active { transform: scale(.96); }
 .searchbox { display: flex; gap: 10px; }
 .searchbox input {
   flex: 1; min-width: 0;
