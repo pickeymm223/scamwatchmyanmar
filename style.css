@@ -115,6 +115,10 @@ a { color: var(--navy2); }
 .type-card b { display: block; font-size: .92rem; margin-bottom: 4px; }
 .type-card span { font-size: .8rem; color: #475569; line-height: 1.4; }
 
+/* ---------- bot card ---------- */
+.bot-card { background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd; }
+.bot-card .btn { margin-top: 12px; }
+
 /* ---------- how to use ---------- */
 .howto { margin: 0; padding: 0; list-style: none; counter-reset: step; }
 .howto li {
