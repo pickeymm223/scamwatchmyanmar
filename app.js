@@ -127,14 +127,23 @@ function renderPayStats() {
     return `<div class="paystat-row">
       <span class="paystat-medal">${medal}</span>
       <span class="paystat-logo">${img}</span>
-      <div class="paystat-bar-wrap"><div class="paystat-bar" style="width:${pct}%"></div></div>
+      <div class="paystat-mid">
+        <div class="paystat-name">${esc(name)}</div>
+        <div class="paystat-bar-wrap"><div class="paystat-bar" style="width:${pct}%"></div></div>
+      </div>
       <span class="paystat-count">${n}</span>
     </div>`;
   }).join("") || `<p class="muted">${t("no_data")}</p>`;
 }
+function fmtCompact(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(2).replace(/\.?0+$/, "") + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.?0+$/, "") + "K";
+  return String(Math.round(n));
+}
 function fmtLossTotals(byCcy) {
   const parts = Object.entries(byCcy).filter(([, a]) => a > 0)
-    .map(([c, a]) => fmtNum(a) + " " + c);
+    .map(([c, a]) => fmtCompact(a) + " " + c);
   return parts.length ? parts.join(" · ") : "0 MMK";
 }
 
@@ -543,6 +552,13 @@ async function loadFbAlerts() {
     el.innerHTML = `<p class="muted">${t("no_data")}</p>`;
   }
 }
+
+/* ---------- hamburger ---------- */
+document.getElementById("hamburger")?.addEventListener("click", () => {
+  document.getElementById("mainNav")?.classList.toggle("open");
+});
+document.querySelectorAll("#mainNav a").forEach(a =>
+  a.addEventListener("click", () => document.getElementById("mainNav")?.classList.remove("open")));
 
 /* ---------- init ---------- */
 document.getElementById("searchForm").addEventListener("submit", e => {
