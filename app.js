@@ -318,107 +318,158 @@ function renderStats() {
 
 
 /* ---------- search ---------- */
-function findMatches(q) {
+/* Global Search — field အကုန် တစ်ခါတည်း ရှာ.
+   Returns: [{label, hits, fkey}, ...] (may include not-found entries with hits=[]) */
+function normTxt(s) { return String(s || "").trim().toLowerCase().replace(/\s+/g, " "); }
+function globalSearch(q) {
   const t = q.trim();
-  const digits = t.replace(/\D/g, "");
-  const hits = [];
+  if (!t) return null;
+  const results = [];
+  const seen = new Set();
+  const notFound = [];
+  const addHits = (label, hits, fkey) => {
+    const fresh = hits.filter(r => !seen.has(r));
+    fresh.forEach(r => seen.add(r));
+    if (fresh.length) results.push({ label, hits: fresh, fkey });
+  };
+
+  // --- 1. Phone (exact) ---
   const ph = normPhone(t);
+  const phoneDigits = ph ? ph.replace(/\D/g, "") : "";
   if (ph) {
-    ROWS.forEach(r => {
-      if (rowPhones(r).includes(ph)) hits.push(r);
-    });
-    return { label: "📱 " + maskPhone(ph), hits };
+    const hits = [];
+    ROWS.forEach(r => { if (rowPhones(r).includes(ph)) hits.push(r); });
+    if (hits.length) addHits("📱 " + maskPhone(ph), hits, "phone");
+    else notFound.push({ label: "📱 " + maskPhone(ph), fkey: "phone" });
   }
-  // Telegram username (@xxx or plain)
-  const atM = t.match(/@(\w{3,})/);
-  if (atM) {
-    const u = atM[1].toLowerCase();
+
+  // --- 2. Numeric: tg_id / binance / bank (exact) ---
+  const matchedIds = new Set();
+  const tidMs = t.match(/(?<!\d)(\d{8,12})(?!\d)/g) || [];
+  tidMs.forEach(tid => {
+    if (tid === phoneDigits || tid.startsWith("09")) return;
+    let hits = [];
+    ROWS.forEach(r => { if (String(r[C.tgId] || "").trim() === tid) hits.push(r); });
+    if (hits.length) { addHits("🆔 " + tid, hits, "tg_id"); matchedIds.add(tid); return; }
+    hits = [];
+    ROWS.forEach(r => { if (binanceUids(r[C.othPh]).includes(tid)) hits.push(r); });
+    if (hits.length) { addHits("🟡 Binance UID " + tid, hits, "binance"); matchedIds.add(tid); return; }
+    if (tid.length >= 10) {
+      hits = [];
+      ROWS.forEach(r => { if (bankDigitsList(r[C.bankAcct]).includes(tid)) hits.push(r); });
+      if (hits.length) { addHits("🏦 " + maskAcct(tid), hits, "bank"); matchedIds.add(tid); return; }
+      notFound.push({ label: "🏦 " + maskAcct(tid), fkey: "bank" });
+    } else {
+      notFound.push({ label: "🆔 " + tid, fkey: "tg_id" });
+    }
+  });
+  // bank with separators
+  const bankMs = t.match(/(?<!\d)(\d[\d\s\-]{8,20}\d)(?!\d)/g) || [];
+  bankMs.forEach(bm => {
+    const d = bm.replace(/\D/g, "");
+    if (d === phoneDigits || d.length < 10 || matchedIds.has(d)) return;
+    const hits = [];
+    ROWS.forEach(r => { if (bankDigitsList(r[C.bankAcct]).includes(d)) hits.push(r); });
+    if (hits.length) { addHits("🏦 " + maskAcct(d), hits, "bank"); matchedIds.add(d); }
+    else notFound.push({ label: "🏦 " + maskAcct(d), fkey: "bank" });
+  });
+
+  // --- 3. Telegram username (exact) ---
+  const atMs = t.match(/@(\w{3,})/g) || [];
+  atMs.forEach(am => {
+    const u = am.slice(1).toLowerCase();
+    const hits = [];
     ROWS.forEach(r => {
       if (String(r[C.telegram] || "").toLowerCase().replace(/^@/, "") === u) hits.push(r);
     });
-    return { label: "✈️ @" + u, hits };
-  }
-  // facebook.com URL
-  const fbM = t.match(/facebook\.com\/([A-Za-z0-9.]+)/i);
-  if (fbM) {
-    const fq = fbM[1].toLowerCase();
+    if (hits.length) addHits("✈️ @" + u, hits, "username");
+    else notFound.push({ label: "✈️ @" + u, fkey: "username" });
+  });
+
+  // --- 4. Names: exact → similar (max 5) ---
+  if (!/\d{4,}/.test(t) && t.length >= 2) {
+    const nq = normTxt(t.replace(/^@/, ""));
+    const fields = [["name", "👤"], ["accName", "💳"], ["facebook", "📘"], ["telegram", "✈️"]];
+    // exact
+    const byField = {};
     ROWS.forEach(r => {
-      if (String(r[C.facebook] || "").toLowerCase().includes(fq)) hits.push(r);
+      if (seen.has(r)) return;
+      for (const [f, icon] of fields) {
+        if (normTxt(r[C[f]]) === nq && nq) { (byField[f] = byField[f] || []).push(r); break; }
+      }
     });
-    return { label: "📘 " + fbM[1].slice(0, 40), hits };
-  }
-  // plain text (not phone/ID/bank) → username + FB name
-  if (t.length >= 3 && !/\d{5,}/.test(t)) {
-    const w = t.replace(/^@/, "").trim();
-    let uhits = [];
-    if (/^[A-Za-z0-9_.]{3,}$/.test(w)) {
-      const ul = w.toLowerCase();
-      ROWS.forEach(r => {
-        if (String(r[C.telegram] || "").toLowerCase().replace(/^@/, "") === ul) uhits.push(r);
-      });
-      if (uhits.length) return { label: "✈️ @" + ul, hits: uhits };
+    for (const [f, icon] of fields) {
+      if (byField[f]) addHits(icon + " " + t.slice(0, 40), byField[f], f);
     }
-    const fl = t.toLowerCase();
-    ROWS.forEach(r => {
-      if (String(r[C.facebook] || "").toLowerCase().includes(fl)) hits.push(r);
-    });
-    return { label: "📘 " + t.slice(0, 40), hits };
+    // similar if no exact
+    if (!Object.keys(byField).length && nq.length >= 3) {
+      const sim = {};
+      ROWS.forEach(r => {
+        if (seen.has(r) || Object.values(sim).flat().length >= 5) return;
+        for (const [f] of fields) {
+          if (normTxt(r[C[f]]).includes(nq)) { (sim[f] = sim[f] || []).push(r); break; }
+        }
+      });
+      for (const [f, icon] of fields) {
+        if (sim[f]) {
+          const fresh = sim[f].filter(r => !seen.has(r));
+          fresh.forEach(r => seen.add(r));
+          if (fresh.length) results.push({ label: icon + " ~" + t.slice(0, 40), hits: fresh, fkey: f + "_similar" });
+        }
+      }
+    }
   }
-  if (/^\d{8,}$/.test(digits) && !digits.startsWith("09") && !digits.startsWith("959")) {
-    ROWS.forEach(r => {
-      if (String(r[C.tgId] || "").trim() === digits) hits.push(r);
-    });
-    if (hits.length) return { label: "\uD83C\uDD94 " + digits, hits };
-    // Binance UID အနေနဲ့ စစ်
-    const uhits = [];
-    ROWS.forEach(r => {
-      if (binanceUids(r[C.othPh]).includes(digits)) uhits.push(r);
-    });
-    if (uhits.length) return { label: "🟡 Binance UID " + digits, hits: uhits };
-    // bank account အနေနဲ့လည်း စစ်
-    const bhits = [];
-    ROWS.forEach(r => {
-      if (bankDigitsList(r[C.bankAcct]).includes(digits)) bhits.push(r);
-    });
-    if (bhits.length) return { label: "\uD83C\uDFE6 " + maskAcct(digits), hits: bhits };
-    return { label: "\uD83C\uDD94 " + digits, hits: [] };
-  }
-  return null;
+
+  notFound.forEach(nf => results.push({ label: nf.label, hits: [], fkey: nf.fkey }));
+  return results.length ? results : null;
+}
+function findMatches(q) {
+  const rs = globalSearch(q);
+  if (!rs) return null;
+  // backward compat: return first result as {label, hits}
+  return rs[0];
 }
 
 function renderResult(q) {
   const box = document.getElementById("result");
-  const m = findMatches(q);
-  if (!m) {
+  const rs = globalSearch(q);
+  if (!rs) {
     box.innerHTML = `<div class="rcard warn"><div class="rhead"><span class="badge warn">ℹ️</span></div>
       <p class="rnote">${t("invalid_input")}</p></div>`;
     return;
   }
-  // stats beacon: type from label icon, hit/miss only (no query value)
-  const st = m.label.startsWith("📱") ? "phone"
-    : m.label.startsWith("🆔") ? "tg_id"
-    : m.label.includes("Binance UID") ? "binance"
-    : m.label.startsWith("✈️") ? "username"
-    : m.label.startsWith("📘") ? "facebook" : "bank";
-  logWebSearch(st, m.hits.length > 0);
-  if (!m.hits.length) {
-    box.innerHTML = `<div class="rcard ok">
-      <div class="rhead"><span class="badge ok">${t("badge_notfound")}</span></div>
-      <div class="rtitle">${esc(m.label)}</div>
-      <p class="rnote">${t("nf_p1")}</p>
-      <p class="rnote">${t("nf_p2")}</p></div>`;
-    return;
+  // stats beacon: first hit type, hit/miss only (no query value)
+  const first = rs.find(r => r.hits.length) || rs[0];
+  const st = first.label.startsWith("📱") ? "phone"
+    : first.label.startsWith("🆔") ? "tg_id"
+    : first.label.includes("Binance UID") ? "binance"
+    : first.label.startsWith("✈️") ? "username"
+    : first.label.startsWith("📘") ? "facebook" : "bank";
+  logWebSearch(st, rs.some(r => r.hits.length));
+  const cards = [];
+  for (const m of rs) {
+    if (!m.hits.length) {
+      cards.push(`<div class="rcard ok">
+        <div class="rhead"><span class="badge ok">${t("badge_notfound")}</span></div>
+        <div class="rtitle">${esc(m.label)}</div>
+        <p class="rnote">${t("nf_p1")}</p>
+        <p class="rnote">${t("nf_p2")}</p></div>`);
+      continue;
+    }
+    // entity အလိုက် စု (bot နဲ့ အတူတူ union-find)
+    const ents = m.hits.map(r => ({
+      fb: r[C.facebook], name: r[C.name], acc: r[C.accName],
+      phones: rowPhones(r), row: r
+    }));
+    const groups = groupEntities(ents);
+    const similar = m.fkey.endsWith("_similar");
+    cards.push(groups.map(g => renderGroup(m.label, g.map(i => ents[i].row), similar)).join(""));
   }
-  // entity အလိုက် စု (bot နဲ့ အတူတူ union-find)
-  const ents = m.hits.map(r => ({
-    fb: r[C.facebook], name: r[C.name], acc: r[C.accName],
-    phones: rowPhones(r), row: r
-  }));
-  const groups = groupEntities(ents);
-  box.innerHTML = groups.map(g => renderGroup(m.label, g.map(i => ents[i].row))).join("");
+  const hasSimilar = rs.some(r => r.fkey.endsWith("_similar") && r.hits.length);
+  box.innerHTML = cards.join("") + (hasSimilar ? `<p class="rnote"><i>💡 ${t("similar_note")}</i></p>` : "");
 }
 
-function renderGroup(label, rows) {
+function renderGroup(label, rows, similar) {
   const verified = rows.some(isVerified);
   const names = [...new Set(rows.map(r => r[C.name]).filter(Boolean))];
   const fbs = [...new Set(rows.map(r => r[C.facebook]).filter(Boolean))];
@@ -467,6 +518,32 @@ function renderGroup(label, rows) {
   </div>`;
 }
 
+/* ---------- FB alerts ---------- */
+async function loadFbAlerts() {
+  const el = document.getElementById("fbList");
+  if (!el) return;
+  try {
+    const r = await fetch("fb_alerts.json?v=" + Date.now());
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    const alerts = d.alerts || [];
+    if (!alerts.length) {
+      el.innerHTML = `<p class="muted">${t("no_data")}</p>`;
+      return;
+    }
+    el.innerHTML = alerts.slice().reverse().map(a => `
+      <div class="fb-item">
+        <div class="fb-meta">📡 ${esc(a.group)} · 🕐 ${esc(a.time || "")}</div>
+        ${a.phones && a.phones.length ? `<div class="fb-meta">📱 ${a.phones.map(esc).join(", ")}</div>` : ""}
+        <div class="fb-preview">${esc(a.preview)}</div>
+        <a class="fb-link" href="${esc(a.url)}" target="_blank" rel="noopener">🔗 ${t("fb_view")}</a>
+      </div>`).join("")
+      + `<p class="rnote">⚠️ ${t("fb_unverified")}</p>`;
+  } catch (e) {
+    el.innerHTML = `<p class="muted">${t("no_data")}</p>`;
+  }
+}
+
 /* ---------- init ---------- */
 document.getElementById("searchForm").addEventListener("submit", e => {
   e.preventDefault();
@@ -476,6 +553,7 @@ document.getElementById("searchForm").addEventListener("submit", e => {
   setTimeout(() => renderResult(q), 1200);
 });
 
+loadFbAlerts();
 loadData().catch(() => {
   document.getElementById("statsBody").innerHTML =
     `<p class="muted">${t("data_error")}</p>`;
