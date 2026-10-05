@@ -329,6 +329,41 @@ function findMatches(q) {
     });
     return { label: "📱 " + maskPhone(ph), hits };
   }
+  // Telegram username (@xxx or plain)
+  const atM = t.match(/@(\w{3,})/);
+  if (atM) {
+    const u = atM[1].toLowerCase();
+    ROWS.forEach(r => {
+      if (String(r[C.telegram] || "").toLowerCase().replace(/^@/, "") === u) hits.push(r);
+    });
+    return { label: "✈️ @" + u, hits };
+  }
+  // facebook.com URL
+  const fbM = t.match(/facebook\.com\/([A-Za-z0-9.]+)/i);
+  if (fbM) {
+    const fq = fbM[1].toLowerCase();
+    ROWS.forEach(r => {
+      if (String(r[C.facebook] || "").toLowerCase().includes(fq)) hits.push(r);
+    });
+    return { label: "📘 " + fbM[1].slice(0, 40), hits };
+  }
+  // plain text (not phone/ID/bank) → username + FB name
+  if (t.length >= 3 && !/\d{5,}/.test(t)) {
+    const w = t.replace(/^@/, "").trim();
+    let uhits = [];
+    if (/^[A-Za-z0-9_.]{3,}$/.test(w)) {
+      const ul = w.toLowerCase();
+      ROWS.forEach(r => {
+        if (String(r[C.telegram] || "").toLowerCase().replace(/^@/, "") === ul) uhits.push(r);
+      });
+      if (uhits.length) return { label: "✈️ @" + ul, hits: uhits };
+    }
+    const fl = t.toLowerCase();
+    ROWS.forEach(r => {
+      if (String(r[C.facebook] || "").toLowerCase().includes(fl)) hits.push(r);
+    });
+    return { label: "📘 " + t.slice(0, 40), hits };
+  }
   if (/^\d{8,}$/.test(digits) && !digits.startsWith("09") && !digits.startsWith("959")) {
     ROWS.forEach(r => {
       if (String(r[C.tgId] || "").trim() === digits) hits.push(r);
@@ -362,7 +397,9 @@ function renderResult(q) {
   // stats beacon: type from label icon, hit/miss only (no query value)
   const st = m.label.startsWith("📱") ? "phone"
     : m.label.startsWith("🆔") ? "tg_id"
-    : m.label.includes("Binance UID") ? "binance" : "bank";
+    : m.label.includes("Binance UID") ? "binance"
+    : m.label.startsWith("✈️") ? "username"
+    : m.label.startsWith("📘") ? "facebook" : "bank";
   logWebSearch(st, m.hits.length > 0);
   if (!m.hits.length) {
     box.innerHTML = `<div class="rcard ok">
