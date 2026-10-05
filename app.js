@@ -553,6 +553,13 @@ async function loadFbAlerts() {
   }
 }
 
+/* ---------- search chips ---------- */
+document.querySelectorAll(".chip").forEach(c =>
+  c.addEventListener("click", () => {
+    const q = document.getElementById("q");
+    if (q) { q.value = c.dataset.ex; q.focus(); renderResult(c.dataset.ex); q.scrollIntoView({behavior:"smooth", block:"center"}); }
+  }));
+
 /* ---------- hamburger ---------- */
 document.getElementById("hamburger")?.addEventListener("click", () => {
   document.getElementById("mainNav")?.classList.toggle("open");
