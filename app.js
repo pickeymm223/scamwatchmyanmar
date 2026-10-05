@@ -252,7 +252,10 @@ async function loadData() {
   const parsed = parseCSV(text);
   resolveColumns(parsed[0] || []);
   const rows = parsed.slice(1); // header ဖြုတ်
-  ROWS = rows.filter(r => {
+  ROWS = rows.map((r, idx) => {
+    r._sheetRow = idx + 2; // original sheet row number (1-indexed + header)
+    return r;
+  }).filter(r => {
     const st = String(r[C.status] || "").trim().toLowerCase();
     if (IGNORED.has(st)) return false;
     // bot နဲ့ အတူ: ဖုန်း / TG ID / ဘဏ်အကောင့် တခုခု ရှိရင် ထည့်
@@ -624,9 +627,7 @@ logWebStats("visit", "-");
     const tryShow = () => {
       if (typeof ROWS !== "undefined" && ROWS.length) {
         const rowNum = parseInt(r, 10);
-        // ROWS is 0-indexed (header excluded); sheet rows are 1-indexed with header at row 1
-        // So sheet row N = ROWS[N-2]
-        const rec = ROWS[rowNum - 2];
+        const rec = ROWS.find(x => x._sheetRow === rowNum);
         if (rec) {
           const label = rec[C.phone] || rec[C.name] || rec[C.facebook] || "Record";
           document.getElementById("result").innerHTML = renderGroup(label, [rec], false);
