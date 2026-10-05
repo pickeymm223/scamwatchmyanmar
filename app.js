@@ -614,15 +614,36 @@ loadData().catch(() => {
 // page visit beacon (unique user မဟုတ် — page view အရေအတွက်သာ)
 logWebStats("visit", "-");
 
-// Auto-search from ?q= URL param (for shared record links from bots)
+// Auto-show record from ?r= URL param (opaque row ID from bots)
 (function() {
   const params = new URLSearchParams(window.location.search);
+  const r = params.get("r");
   const q = params.get("q");
-  if (q) {
+  if (r) {
+    // Find record by sheet row number and display directly
+    const tryShow = () => {
+      if (typeof ROWS !== "undefined" && ROWS.length) {
+        const rowNum = parseInt(r, 10);
+        // ROWS is 0-indexed (header excluded); sheet rows are 1-indexed with header at row 1
+        // So sheet row N = ROWS[N-2]
+        const rec = ROWS[rowNum - 2];
+        if (rec) {
+          const label = rec[C.phone] || rec[C.name] || rec[C.facebook] || "Record";
+          document.getElementById("result").innerHTML = renderGroup(label, [rec], false);
+          document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+        } else {
+          document.getElementById("result").innerHTML =
+            `<p class="muted">Record မတွေ့ပါ</p>`;
+        }
+      } else {
+        setTimeout(tryShow, 500);
+      }
+    };
+    setTimeout(tryShow, 1500);
+  } else if (q) {
     const input = document.getElementById("q");
     if (input) {
       input.value = q;
-      // Wait for data to load, then search
       const trySearch = () => {
         if (typeof renderResult === "function") {
           document.getElementById("result").innerHTML =
