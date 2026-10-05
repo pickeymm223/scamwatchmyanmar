@@ -613,3 +613,26 @@ loadData().catch(() => {
 
 // page visit beacon (unique user မဟုတ် — page view အရေအတွက်သာ)
 logWebStats("visit", "-");
+
+// Auto-search from ?q= URL param (for shared record links from bots)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("q");
+  if (q) {
+    const input = document.getElementById("q");
+    if (input) {
+      input.value = q;
+      // Wait for data to load, then search
+      const trySearch = () => {
+        if (typeof renderResult === "function") {
+          document.getElementById("result").innerHTML =
+            `<div class="loading"><span class="spinner"></span>${t("loading")}</div>`;
+          setTimeout(() => renderResult(q), 800);
+        } else {
+          setTimeout(trySearch, 500);
+        }
+      };
+      setTimeout(trySearch, 1500);
+    }
+  }
+})();
