@@ -42,19 +42,22 @@ a { color: var(--navy2); }
 .brand { display: inline-flex; align-items: center; text-decoration: none; }
 .logo { height: 30px; width: auto; display: block; }
 
+.bar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .menubtn {
   background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
   color: #fff; font-size: .85rem; font-weight: 700;
-  cursor: pointer; padding: 6px 12px; border-radius: 8px; margin-left: auto;
+  cursor: pointer; padding: 6px 12px; border-radius: 8px;
 }
 .menubtn:hover { background: rgba(255,255,255,.22); }
 .hdr-link {
   color: rgba(255,255,255,.9); text-decoration: none;
-  font-size: .9rem; font-weight: 600; margin-left: 14px; white-space: nowrap;
+  font-size: .9rem; font-weight: 600; white-space: nowrap;
 }
 .hdr-link:hover { color: #fff; }
 @media (max-width: 480px) {
-  .hdr-link { font-size: .82rem; margin-left: 10px; }
+  .hdr-link { font-size: .82rem; }
+  .bar-right { gap: 8px; }
+}
 }
 .topbar { position: sticky; top: 0; z-index: 10; }
 .topbar nav {
@@ -343,4 +346,8 @@ footer .fine { margin: 0; }
 @media (min-width: 560px) {
   .hero h1 { font-size: 2.3rem; }
   .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 900px) {
+  .wrap { max-width: 1100px; }
+  .type-grid { grid-template-columns: repeat(4, 1fr); }
 }
