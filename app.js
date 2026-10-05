@@ -35,6 +35,7 @@ const HDR_MAP = [
   ["payType", ["ငွေပေးချေမှုအမျိုးအစား"]],
   ["accName", ["လက်ခံသူအကောင့်နာမည်"]],
   ["bankAcct", ["ဘဏ်အကောင့်"]],
+  ["bankAcctPl", ["ဘဏ်အကောင့်များ"]],
   ["story", ["ဖြစ်စဉ်"]],
   ["loss", ["ဆုံးရှုံးငွေ"]],
   ["viber", ["Viber"]],
@@ -261,7 +262,8 @@ async function loadData() {
     // bot နဲ့ အတူ: ဖုန်း / TG ID / ဘဏ်အကောင့် တခုခု ရှိရင် ထည့်
     return (r[C.phone] || "").trim() !== ""
         || (r[C.tgId] || "").trim() !== ""
-        || (r[C.bankAcct] || "").trim() !== "";
+        || (r[C.bankAcct] || "").trim() !== ""
+        || (r[C.bankAcctPl] || "").trim() !== "";
   });
   renderStats();
 }
