@@ -71,6 +71,13 @@
 .like-btn.on{background:#fef2f2;border-color:#fca5a5}
 .share-btn{padding:9px 14px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:24px;font-size:.88rem;cursor:pointer}
 .views{font-size:.88rem;color:#64748b;margin-left:auto}
+.round-btn{width:44px;height:44px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none}
+.round-btn svg{width:24px;height:24px;display:block}
+.round-btn.ok{background:#f0fdf4;border-color:#86efac}
+.stat-like,.stat-share{background:none;border:0;font-size:.82rem;color:#64748b;cursor:pointer;padding:6px 4px;font-family:inherit}
+.stat-like.on{color:#dc2626}
+.post-card{cursor:pointer}
+.seemore{color:#1d4ed8;font-weight:600;font-size:.88rem;white-space:nowrap}
 #blogPost img{max-width:100%;border-radius:8px}
 #blogPost{line-height:1.8;font-size:.96rem}
 #blogPost h2{font-size:1.1rem;color:var(--navy);margin:20px 0 8px}
@@ -84,6 +91,9 @@
   const q = new URLSearchParams(location.search);
   const slug = q.get("p");
   function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  const SVG_TG = '<svg viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>';
+  const SVG_FB = '<svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>';
+  const SVG_SHARE = '<svg viewBox="0 0 24 24" fill="#475569"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>';
   function badgeCls(l){
     if(/သတိပေးချက်/.test(l)) return "b-red";
     if(/လိမ်နည်း/.test(l)) return "b-orange";
@@ -95,10 +105,21 @@
   function labelsHtml(ls){return (ls||[]).map(l=>'<span class="badge '+badgeCls(l)+'">'+esc(l)+"</span>").join("");}
   function readTime(t){const n=String(t||"").replace(/<[^>]*>/g,"").length;return Math.max(1,Math.ceil(n/500))+" မိနစ်စာ";}
   function fmt(n){n=n|0;return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,"")+"k":""+n;}
-  function statsHtml(p){return "<span>👁 "+fmt(p.views)+"</span><span>❤️ "+fmt(p.likes)+"</span><span>↗️ "+fmt(p.shares)+"</span>";}
   function postUrl(s){return "https://scamwatchmyanmar.com/blog.html?p="+encodeURIComponent(s);}
-  function bump(s,a){fetch(API+"/api/stats/"+encodeURIComponent(s),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:a})}).catch(()=>{});}
+  function bump(s,a,done){fetch(API+"/api/stats/"+encodeURIComponent(s),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:a})}).then(r=>r.json()).then(d=>{done&&done(d);}).catch(()=>{});}
+  function copyLink(url, btn){
+    const ok = ()=>{ btn.classList.add("ok"); const old=btn.innerHTML; btn.innerHTML='<svg viewBox="0 0 24 24" fill="#16a34a" width="24" height="24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'; setTimeout(()=>{btn.classList.remove("ok");btn.innerHTML=old;},1500); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok).catch(ok);}
+    else{const ta=document.createElement("textarea");ta.value=url;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}document.body.removeChild(ta);ok();}
+  }
+  function doLike(sl, btn){
+    if(localStorage.getItem("sw_liked_"+sl)==="1") return;
+    localStorage.setItem("sw_liked_"+sl,"1");
+    btn.classList.add("on");
+    bump(sl,"like",function(d){const n=btn.querySelector("span");if(n)n.textContent=fmt(d.likes);});
+  }
   function empty(){ listEl.innerHTML='<p class="muted">ဆောင်းပါးများ မကြာမီ လာမည်…</p>'; }
+
   if (slug) {
     listEl.style.display = "none"; postEl.style.display = "block";
     fetch(API+"/api/post/"+encodeURIComponent(slug)).then(r=>{if(!r.ok)throw 0;return r.json();}).then(p=>{
@@ -111,26 +132,18 @@
         + '<div class="post-body">'+p.html+"</div>"
         + '<div class="action-bar">'
         + '<button class="like-btn'+(liked?" on":"")+'" id="likeBtn">❤️ <span id="likeN">'+fmt(p.likes)+"</span></button>"
-        + '<button class="share-btn" data-sh="tg">✈️ Telegram</button>'
-        + '<button class="share-btn" data-sh="fb">📘 Facebook</button>'
-        + '<button class="share-btn" data-sh="copy">🔗 လင့်ကူး</button>'
+        + '<button class="round-btn" data-sh="tg" title="Telegram">'+SVG_TG+"</button>"
+        + '<button class="round-btn" data-sh="fb" title="Facebook">'+SVG_FB+"</button>"
+        + '<button class="round-btn" data-sh="copy" title="Share">'+SVG_SHARE+"</button>"
         + '<span class="views">👁 '+fmt((p.views|0)+1)+"</span>"
         + "</div>";
-      document.getElementById("likeBtn").onclick = function(){
-        if(localStorage.getItem("sw_liked_"+slug)==="1") return;
-        localStorage.setItem("sw_liked_"+slug,"1");
-        this.classList.add("on");
-        fetch(API+"/api/stats/"+encodeURIComponent(slug),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"like"})})
-          .then(r=>r.json()).then(d=>{document.getElementById("likeN").textContent=fmt(d.likes);})
-          .catch(()=>{document.getElementById("likeN").textContent=fmt((p.likes|0)+1);});
-      };
+      document.getElementById("likeBtn").onclick = function(){ doLike(slug, this); };
       postEl.querySelectorAll("[data-sh]").forEach(function(b){
         b.onclick = function(){
-          bump(slug,"share");
           const t = b.dataset.sh;
-          if(t==="tg") window.open("https://t.me/share/url?url="+encodeURIComponent(url)+"&text="+encodeURIComponent(p.title),"_blank");
-          else if(t==="fb") window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url),"_blank");
-          else if(t==="copy"){ navigator.clipboard.writeText(url).then(()=>{b.textContent="✓ ကူးပြီးပြီ";}); }
+          if(t==="tg"){ bump(slug,"share"); window.open("https://t.me/share/url?url="+encodeURIComponent(url)+"&text="+encodeURIComponent(p.title),"_blank"); }
+          else if(t==="fb"){ bump(slug,"share"); window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url),"_blank"); }
+          else if(t==="copy"){ bump(slug,"share"); copyLink(url, b); }
         };
       });
     }).catch(()=>{postEl.innerHTML='<p class="muted">ဆောင်းပါး ရှာမတွေ့ပါ</p><a href="blog.html" class="back">← ပြန်သွား</a>';});
@@ -139,12 +152,34 @@
   fetch(API+"/api/posts").then(r=>{if(!r.ok)throw 0;return r.json();}).then(d=>{
     const posts = (d&&d.posts)||[];
     if(!posts.length){empty();return;}
-    listEl.innerHTML = posts.map(p=>
-      '<div class="post-card"><h2><a href="blog.html?p='+encodeURIComponent(p.slug)+'">'+esc(p.title)+"</a></h2>"
+    listEl.innerHTML = posts.map(p=>{
+      const sl = p.slug, liked = localStorage.getItem("sw_liked_"+sl)==="1";
+      return '<div class="post-card" data-open="'+esc(sl)+'">'
+      + "<h2>"+esc(p.title)+"</h2>"
       + '<div class="post-meta">'+esc(p.date||"")+" · "+readTime(p.excerpt)+" · "+labelsHtml(p.labels)+"</div>"
-      + '<div class="post-excerpt">'+esc(p.excerpt||"")+"</div>"
-      + '<div class="stats">'+statsHtml(p)+"</div></div>"
-    ).join("");
+      + '<div class="post-excerpt">'+esc(p.excerpt||"")+' <span class="seemore">ဆက်ဖတ်ရန် →</span></div>'
+      + '<div class="stats"><span>👁 '+fmt(p.views)+"</span>"
+      + '<button class="stat-like'+(liked?" on":"")+'" data-like="'+esc(sl)+'">❤️ <span>'+fmt(p.likes)+"</span></button>"
+      + '<button class="stat-share" data-share="'+esc(sl)+'">↗️ <span>'+fmt(p.shares)+"</span></button>"
+      + "</div></div>";
+    }).join("");
+    listEl.querySelectorAll("[data-open]").forEach(function(card){
+      card.addEventListener("click", function(e){
+        if(e.target.closest("[data-like]")||e.target.closest("[data-share]")) return;
+        location.href = "blog.html?p="+encodeURIComponent(card.dataset.open);
+      });
+    });
+    listEl.querySelectorAll("[data-like]").forEach(function(b){
+      b.addEventListener("click", function(e){ e.stopPropagation(); doLike(b.dataset.like, b); });
+    });
+    listEl.querySelectorAll("[data-share]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        const sl = b.dataset.share;
+        bump(sl,"share",function(d){const n=b.querySelector("span");if(n)n.textContent=fmt(d.shares);});
+        copyLink(postUrl(sl), b);
+      });
+    });
   }).catch(empty);
 })();
 </script>
