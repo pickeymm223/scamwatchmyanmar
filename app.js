@@ -530,6 +530,9 @@ function renderGroup(label, rows, similar) {
   }
   const descs = [...new Set(rows.map(r => r[C.story]).filter(Boolean))];
   const tgUrls = [...new Set(rows.map(r => (r[C.tgUrl] || "").trim()).filter(Boolean))];
+  // Website record page link (preferred over Telegraph)
+  const sheetRows = [...new Set(rows.map(r => r._sheetRow).filter(Boolean))];
+  const recordLink = sheetRows.length ? `/r/${sheetRows[0]}.html` : (tgUrls.length ? tgUrls[0] : "");
   const row = (k, v) => v ? `<div class="rrow"><span class="k">${k}</span><span class="v">${v}</span></div>` : "";
   const platIcons = { Facebook: "📘", Telegram: "✈️", Viber: "📞", Binance: "🟡", Bitget: "🔵" };
   const socialRows = Object.entries(socialAll).map(([plat, vals]) =>
@@ -552,7 +555,7 @@ function renderGroup(label, rows, similar) {
       ${row(t("lbl_loss"), lossStr !== "0 MMK" ? lossStr : "")}
     </div>
     ${descs.map(d => `<div class="story"><b>${t("story_h")}</b><br>${esc(maskPhonesInText(summarize(d)))}</div>`).join("")}
-    ${tgUrls.length ? `<a class="readmore" href="${esc(tgUrls[0])}" target="_blank" rel="noopener">${t("readmore")}</a>` : ""}
+    ${recordLink ? `<a class="readmore" href="${esc(recordLink)}" target="_blank" rel="noopener">${t("readmore")}</a>` : ""}
     <p class="rnote">${t("warn_dont")}</p>
     <p class="rnote">${t("note_label")} ${t("pend_p1")}</p>
     <p class="rnote">${t("pend_p2")}</p>
