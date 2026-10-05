@@ -561,7 +561,7 @@ document.querySelectorAll(".chip").forEach(c =>
   }));
 
 /* ---------- hamburger ---------- */
-document.getElementById("hamburger")?.addEventListener("click", () => {
+document.getElementById("menubtn")?.addEventListener("click", () => {
   document.getElementById("mainNav")?.classList.toggle("open");
 });
 document.querySelectorAll("#mainNav a").forEach(a =>
