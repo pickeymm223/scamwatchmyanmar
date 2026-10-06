@@ -7,6 +7,13 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blog — ScamWatch Myanmar</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ScamWatch Myanmar">
+<meta property="og:title" content="Blog — ScamWatch Myanmar">
+<meta property="og:description" content="လိမ်လည်မှုသတိပေးချက်များ၊ လိမ်နည်းအသစ်များနှင့် ကာကွယ်နည်းလမ်းများ — ScamWatch Myanmar">
+<meta property="og:image" content="https://scamwatchmyanmar.com/logo.png">
+<meta property="og:url" content="https://scamwatchmyanmar.com/blog.html">
+<meta name="twitter:card" content="summary_large_image">
 <!-- v5 badges+stats -->
 <link rel="stylesheet" href="style.css?v=2">
 <style>
@@ -127,7 +134,7 @@
   function labelsHtml(ls){return (ls||[]).map(l=>'<span class="badge '+badgeCls(l)+'">'+esc(l)+"</span>").join("");}
   function readTime(t){const n=String(t||"").replace(/<[^>]*>/g,"").length;return Math.max(1,Math.ceil(n/500))+" မိနစ်စာ";}
   function fmt(n){n=n|0;return n>=1000?(n/1000).toFixed(1).replace(/\.0$/,"")+"k":""+n;}
-  function postUrl(s){return "https://scamwatchmyanmar.com/blog.html?p="+encodeURIComponent(s);}
+  function postUrl(s){return "https://cms.scamwatchmyanmar.com/p/"+encodeURIComponent(s);}
   function bump(s,a,done){fetch(API+"/api/stats/"+encodeURIComponent(s),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:a})}).then(r=>r.json()).then(d=>{done&&done(d);}).catch(()=>{});}
   function copyLink(url, btn){
     const ok = ()=>{ btn.classList.add("ok"); const old=btn.innerHTML; btn.innerHTML='<svg viewBox="0 0 24 24" fill="#16a34a" width="24" height="24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'; setTimeout(()=>{btn.classList.remove("ok");btn.innerHTML=old;},1500); };
