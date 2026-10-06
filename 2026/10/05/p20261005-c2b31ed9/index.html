@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html lang="my"><head><meta charset="utf-8">
-<title>အွန်လိုင်းအရောင်းအဝယ်မှာ လိမ်မခံရအောင် — အခြေခံ ၇ ချက်</title>
-<link rel="canonical" href="https://cms.scamwatchmyanmar.com/p/p20261005-c2b31ed9">
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>အွန်လိုင်းအရောင်းအဝယ်မှာ လိမ်မခံရအောင် — အခြေခံ ၇ ချက် — ScamWatch Myanmar</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="ScamWatch Myanmar">
 <meta property="og:title" content="အွန်လိုင်းအရောင်းအဝယ်မှာ လိမ်မခံရအောင် — အခြေခံ ၇ ချက်">
@@ -9,5 +12,61 @@
 <meta property="og:image" content="https://cms.scamwatchmyanmar.com/img/1791227724436-a13ad0">
 <meta property="og:url" content="https://scamwatchmyanmar.com/2026/10/05/p20261005-c2b31ed9/">
 <meta name="twitter:card" content="summary_large_image">
-</head><body><p>အွန်လိုင်းအရောင်းအဝယ်မှာ လိမ်မခံရအောင် — အခြေခံ ၇ ချက်</p><p>အွန်လိုင်းကနေ ပစ္စည်းဝယ်တာ၊ ဂိမ်းအကောင့်ဝယ်တာ၊ ငွေလွှဲလုပ်ငန်းလုပ်တာ — နေ့တိုင်းလုပ်နေကြပေမယ့် လိမ်လည်မှုတွေလည်း နေ့တိုင်းရှိနေတယ်။ ScamWatch Myanmar က လက်ခံရရှိတဲ့ တိုင်ကြားချက်တွေအရ အဖြစ်အများဆုံး လ</p><p><a href="https://cms.scamwatchmyanmar.com/p/p20261005-c2b31ed9">ဆဆ်ဖတ်ရန် →</a></p>
-<script>location.replace("https://cms.scamwatchmyanmar.com/p/p20261005-c2b31ed9")</script></body></html>
+<link rel="stylesheet" href="/style.css?v=2">
+<style>
+.post-wrap{max-width:720px;margin:0 auto;padding:16px}
+.post-wrap h1{font-size:1.35rem;line-height:1.5;margin:12px 0 8px}
+.post-meta{color:#64748b;font-size:.85rem;margin-bottom:16px}
+.post-body{font-size:1.06rem;line-height:1.9}
+.post-body img{max-width:100%;border-radius:8px}
+.action-bar{display:flex;gap:10px;align-items:center;margin:24px 0;padding:16px 0;border-top:1px solid #e2e8f0}
+.like-btn{padding:9px 18px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:24px;font-size:.95rem;cursor:pointer}
+.like-btn.on{background:#fee2e2;border-color:#fca5a5}
+.back{display:inline-block;margin-bottom:8px;text-decoration:none;font-weight:600;color:#1e40af}
+.share-row{display:flex;gap:8px}
+.round-btn{width:42px;height:42px;border-radius:50%;border:1px solid #cbd5e1;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.topbar{background:#1e3a8a;color:#fff;padding:12px 16px}
+.topbar a{color:#fff;text-decoration:none;font-weight:700}
+</style>
+</head>
+<body>
+<div class="topbar"><a href="/">🛡️ ScamWatch Myanmar</a></div>
+<div class="post-wrap">
+<a href="/blog/" class="back">← ဆောင်းပါးများ</a>
+<div id="post"><p>ဖတ်နေတယ်…</p></div>
+</div>
+<script>
+var SLUG = "p20261005-c2b31ed9";
+var API = "https://cms.scamwatchmyanmar.com";
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function fmt(n){return Number(n||0).toLocaleString("en-US");}
+function bump(a,done){fetch(API+"/api/stats/"+encodeURIComponent(SLUG),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:a})}).then(function(r){return r.json();}).then(function(d){done&&done(d);}).catch(function(){});}
+fetch(API+"/api/post/"+encodeURIComponent(SLUG)).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(p){
+  bump("view");
+  document.title = p.title + " — ScamWatch Myanmar";
+  var liked = localStorage.getItem("sw_liked_"+SLUG)==="1";
+  var url = location.href;
+  var labels = (p.labels||[]).map(function(l){return '<span class="badge">'.replace("badge", "lb") + esc(l) + "</span>";}).join(" ");
+  document.getElementById("post").innerHTML =
+    "<h1>"+esc(p.title)+"</h1>"
+    + '<div class="post-meta">'+esc(p.date||"")+" · "+labels+"</div>"
+    + '<div class="post-body">'+p.html+"</div>"
+    + '<div class="action-bar">'
+    + '<button class="like-btn'+(liked?" on":"")+'" id="likeBtn">❤️ <span>'+fmt(p.likes)+"</span></button>"
+    + '<div class="share-row">'
+    + '<button class="round-btn" id="shTg" title="Telegram"><svg viewBox="0 0 24 24" width="22" height="22" fill="#229ED9"><path d="M21.9 4.6L2.7 12.1c-.8.3-.8 1.4.1 1.6l4.8 1.5 1.8 5.6c.3.9 1.4 1 1.9.2l2.6-3.1 5 3.7c.6.5 1.6.1 1.8-.7l3.1-14.8c.2-1-.9-1.8-1.9-1.5z"/></svg></button>'
+    + '<button class="round-btn" id="shFb" title="Facebook"><svg viewBox="0 0 24 24" width="22" height="22" fill="#1877F2"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.09 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.09 24 18.1 24 12.07z"/></svg></button>'
+    + '<button class="round-btn" id="shCopy" title="Copy link"><svg viewBox="0 0 24 24" width="22" height="22" fill="#64748b"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>'
+    + "</div></div>";
+  document.getElementById("likeBtn").onclick = function(){
+    if(localStorage.getItem("sw_liked_"+SLUG)==="1")return;
+    localStorage.setItem("sw_liked_"+SLUG,"1");this.classList.add("on");
+    var btn=this;bump("like",function(d){var n=btn.querySelector("span");if(n)n.textContent=fmt(d.likes);});
+  };
+  document.getElementById("shTg").onclick = function(){bump("share");window.open("https://t.me/share/url?url="+encodeURIComponent(url)+"&text="+encodeURIComponent(p.title),"_blank");};
+  document.getElementById("shFb").onclick = function(){bump("share");window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url),"_blank");};
+  document.getElementById("shCopy").onclick = function(){bump("share");if(navigator.clipboard)navigator.clipboard.writeText(url);};
+}).catch(function(){document.getElementById("post").innerHTML="<p>ဆောင်းပါး ရှာမတွေ့ပါ။</p>";});
+</script>
+</body>
+</html>
