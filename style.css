@@ -55,9 +55,10 @@ a { color: var(--navy2); }
 }
 .hdr-link:hover { color: #fff; }
 @media (max-width: 480px) {
-  .hdr-link { font-size: .82rem; }
-  .bar-right { gap: 28px; }
-  .menubtn { font-size: .78rem; padding: 5px 10px; }
+  .hdr-link { font-size: .78rem; font-weight: 800; }
+  .bar-right { gap: 12px; }
+  .menubtn { font-size: .72rem; padding: 4px 8px; }
+  .logo { height: 32px; }
 }
 }
 .topbar { position: sticky; top: 0; z-index: 10; }
