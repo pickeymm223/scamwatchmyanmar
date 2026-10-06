@@ -194,7 +194,7 @@
       + '<div class="post-excerpt">'+esc(p.excerpt||"")+' <span class="seemore">ဆက်ဖတ်ရန် →</span></div>'
       + '<div class="stats"><span class="stat-ico">👁 <span>'+fmt(p.views)+"</span></span>"
       + '<button class="stat-like'+(liked?" on":"")+'" data-like="'+esc(sl)+'">❤️ <span>'+fmt(p.likes)+"</span></button>"
-      + '<button class="stat-share" data-share="'+esc(sl)+'">🖗 <span>'+fmt(p.shares)+"</span></button>"
+      + '<button class="stat-share" data-share="'+esc(sl)+'">↗️ <span>'+fmt(p.shares)+"</span></button>"
       + "</div></div>";
     }).join("");
     listEl.querySelectorAll("[data-open]").forEach(function(card){
