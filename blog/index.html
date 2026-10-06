@@ -184,7 +184,7 @@
           return '<div class="rel-card" data-rel="'+esc(x.slug)+'"><h4>'+esc(x.title)+'</h4><div class="post-meta">'+esc(x.date||"")+" · "+labelsHtml(x.labels)+"</div></div>";
         }).join("")+"</div>");
         postEl.querySelectorAll("[data-rel]").forEach(function(c){
-          c.addEventListener("click", function(){ location.href = "/blog/?p="+encodeURIComponent(c.dataset.rel); });
+          c.addEventListener("click", function(){ location.href = postUrl(c.dataset.rel); });
         });
       }).catch(function(){});
     }).catch(()=>{postEl.innerHTML='<p class="muted">ဆောင်းပါး ရှာမတွေ့ပါ</p><a href="/blog/" class="back">← ပြန်သွား</a>';});
@@ -203,7 +203,7 @@
     }).join("");
     listEl.querySelectorAll("[data-open]").forEach(function(card){
       card.addEventListener("click", function(){
-        location.href = "/blog/?p="+encodeURIComponent(card.dataset.open);
+        location.href = postUrl(card.dataset.open);
       });
     });
 
@@ -214,7 +214,7 @@
         return '<div class="mr-row" data-mr="'+esc(p.slug)+'"><span class="mr-num">'+(i+1)+'</span><span><span class="mr-title">'+esc(p.title)+'</span><br><span class="mr-views">👁 '+fmt(p.views)+'</span></span></div>';
       }).join("") + "</div>";
       mrEl.querySelectorAll("[data-mr]").forEach(function(r){
-        r.addEventListener("click", function(){ location.href = "/blog/?p="+encodeURIComponent(r.dataset.mr); });
+        r.addEventListener("click", function(){ location.href = postUrl(r.dataset.mr); });
       });
     } else { mrEl.innerHTML = ""; }
   }).catch(empty);
