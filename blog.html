@@ -50,6 +50,7 @@
 <a href="index.html" class="back">← ပင်မစာမျက်နှာ</a>
 <div class="card">
 <p>လိမ်လည်မှုသတိပေးချက်များ၊ အသိပညာပေး ဆောင်းပါးများ</p>
+<div id="mostRead"></div>
 <div id="blogList">
 <p class="muted">ဖတ်နေတယ်…</p>
 </div>
@@ -78,8 +79,18 @@
 .stat-like.on{color:#dc2626}
 .post-card{cursor:pointer}
 .seemore{color:#1d4ed8;font-weight:600;font-size:.88rem;white-space:nowrap}
+.mostread{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin:0 0 16px}
+.mostread h3{margin:0 0 6px;font-size:1rem;color:var(--navy)}
+.mr-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #f1f5f9;cursor:pointer}
+.mr-num{font-size:1.7rem;font-weight:800;color:#dc2626;min-width:36px;text-align:center;line-height:1}
+.mr-title{font-weight:600;color:#1e293b;font-size:.95rem}
+.mr-views{font-size:.78rem;color:#64748b}
+.related{margin-top:28px;border-top:1px solid #e2e8f0;padding-top:16px}
+.related h3{font-size:1rem;color:var(--navy);margin:0 0 6px}
+.rel-card{border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin:10px 0;cursor:pointer;background:#fff}
+.rel-card h4{margin:0 0 4px;font-size:.95rem;color:var(--navy)}
 #blogPost img{max-width:100%;border-radius:8px}
-#blogPost{line-height:1.8;font-size:.96rem}
+#blogPost{line-height:1.9;font-size:1.06rem}
 #blogPost h2{font-size:1.1rem;color:var(--navy);margin:20px 0 8px}
 #blogPost h3{font-size:1rem;color:var(--navy);margin:16px 0 6px}
 </style>
@@ -122,6 +133,7 @@
 
   if (slug) {
     listEl.style.display = "none"; postEl.style.display = "block";
+    document.getElementById("mostRead").style.display = "none";
     fetch(API+"/api/post/"+encodeURIComponent(slug)).then(r=>{if(!r.ok)throw 0;return r.json();}).then(p=>{
       bump(slug,"view");
       const liked = localStorage.getItem("sw_liked_"+slug)==="1";
@@ -146,6 +158,17 @@
           else if(t==="copy"){ bump(slug,"share"); copyLink(url, b); }
         };
       });
+      fetch(API+"/api/posts").then(r=>r.json()).then(d=>{
+        var all=(d&&d.posts)||[];
+        var rel=all.filter(function(x){ return x.slug!==slug && (x.labels||[]).some(function(l){ return (p.labels||[]).indexOf(l)>=0; }); }).slice(0,3);
+        if(!rel.length) return;
+        postEl.insertAdjacentHTML("beforeend", '<div class="related"><h3>🔗 ဆက်စပ်ဆောင်းပါး</h3>'+rel.map(function(x){
+          return '<div class="rel-card" data-rel="'+esc(x.slug)+'"><h4>'+esc(x.title)+'</h4><div class="post-meta">'+esc(x.date||"")+" · "+labelsHtml(x.labels)+"</div></div>";
+        }).join("")+"</div>");
+        postEl.querySelectorAll("[data-rel]").forEach(function(c){
+          c.addEventListener("click", function(){ location.href = "blog.html?p="+encodeURIComponent(c.dataset.rel); });
+        });
+      }).catch(function(){});
     }).catch(()=>{postEl.innerHTML='<p class="muted">ဆောင်းပါး ရှာမတွေ့ပါ</p><a href="blog.html" class="back">← ပြန်သွား</a>';});
     return;
   }
@@ -180,6 +203,16 @@
         copyLink(postUrl(sl), b);
       });
     });
+    var top5 = posts.slice().sort(function(a,b){return (b.views|0)-(a.views|0);}).slice(0,5);
+    var mrEl = document.getElementById("mostRead");
+    if(top5.length && (top5[0].views|0) > 0){
+      mrEl.innerHTML = '<div class="mostread"><h3>🔥 အဖတ်များဆုံး</h3>' + top5.map(function(p,i){
+        return '<div class="mr-row" data-mr="'+esc(p.slug)+'"><span class="mr-num">'+(i+1)+'</span><span><span class="mr-title">'+esc(p.title)+'</span><br><span class="mr-views">👁 '+fmt(p.views)+'</span></span></div>';
+      }).join("") + "</div>";
+      mrEl.querySelectorAll("[data-mr]").forEach(function(r){
+        r.addEventListener("click", function(){ location.href = "blog.html?p="+encodeURIComponent(r.dataset.mr); });
+      });
+    } else { mrEl.innerHTML = ""; }
   }).catch(empty);
 })();
 </script>
