@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /report/
+
+Sitemap: https://scamwatchmyanmar.com/sitemap.xml
