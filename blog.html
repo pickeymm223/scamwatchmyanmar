@@ -67,9 +67,9 @@
 .b-blue{background:#eff6ff;color:#1d4ed8}.b-green{background:#f0fdf4;color:#16a34a}
 .b-purple{background:#faf5ff;color:#7c3aed}.b-grey{background:#f1f5f9;color:#475569}
 .stats{display:flex;align-items:center;gap:18px;margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;font-size:.85rem;color:#64748b}
-.stat-ico{display:inline-flex;align-items:center;gap:5px}
-.stat-ico svg,.stat-like svg,.stat-share svg{width:16px;height:16px;flex:none}
-.stat-like.on svg{stroke:#dc2626;fill:#dc2626}
+
+
+
 .like-btn{display:inline-flex;align-items:center;gap:6px}
 .like-btn svg{width:18px;height:18px}
 .like-btn.on svg{stroke:#dc2626;fill:#dc2626}
@@ -85,8 +85,8 @@
 .round-btn{width:44px;height:44px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none}
 .round-btn svg{width:24px;height:24px;display:block}
 .round-btn.ok{background:#f0fdf4;border-color:#86efac}
-.stat-like,.stat-share{background:none;border:0;font-size:.85rem;color:#64748b;cursor:pointer;padding:4px 2px;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
-.stat-like.on{color:#dc2626}
+
+
 .post-card{cursor:pointer}
 .seemore{color:#1d4ed8;font-weight:600;font-size:.88rem;white-space:nowrap}
 .mostread{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin:0 0 16px}
@@ -187,33 +187,19 @@
     const posts = (d&&d.posts)||[];
     if(!posts.length){empty();return;}
     listEl.innerHTML = posts.map(p=>{
-      const sl = p.slug, liked = localStorage.getItem("sw_liked_"+sl)==="1";
+      const sl = p.slug;
       return '<div class="post-card" data-open="'+esc(sl)+'">'
       + "<h2>"+esc(p.title)+"</h2>"
       + '<div class="post-meta">'+esc(p.date||"")+" · "+readTime(p.excerpt)+" · "+labelsHtml(p.labels)+"</div>"
       + '<div class="post-excerpt">'+esc(p.excerpt||"")+' <span class="seemore">ဆက်ဖတ်ရန် →</span></div>'
-      + '<div class="stats"><span class="stat-ico">👁 <span>'+fmt(p.views)+"</span></span>"
-      + '<button class="stat-like'+(liked?" on":"")+'" data-like="'+esc(sl)+'">❤️ <span>'+fmt(p.likes)+"</span></button>"
-      + '<button class="stat-share" data-share="'+esc(sl)+'">↗️ <span>'+fmt(p.shares)+"</span></button>"
-      + "</div></div>";
+      + "</div>";
     }).join("");
     listEl.querySelectorAll("[data-open]").forEach(function(card){
-      card.addEventListener("click", function(e){
-        if(e.target.closest("[data-like]")||e.target.closest("[data-share]")) return;
+      card.addEventListener("click", function(){
         location.href = "blog.html?p="+encodeURIComponent(card.dataset.open);
       });
     });
-    listEl.querySelectorAll("[data-like]").forEach(function(b){
-      b.addEventListener("click", function(e){ e.stopPropagation(); doLike(b.dataset.like, b); });
-    });
-    listEl.querySelectorAll("[data-share]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        const sl = b.dataset.share;
-        bump(sl,"share",function(d){const n=b.querySelector("span");if(n)n.textContent=fmt(d.shares);});
-        copyLink(postUrl(sl), b);
-      });
-    });
+
     var top5 = posts.slice().sort(function(a,b){return (b.views|0)-(a.views|0);}).slice(0,5);
     var mrEl = document.getElementById("mostRead");
     if(top5.length && (top5[0].views|0) > 0){
