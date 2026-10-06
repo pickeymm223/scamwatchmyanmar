@@ -66,7 +66,8 @@
 .b-red{background:#fef2f2;color:#dc2626}.b-orange{background:#fff7ed;color:#ea580c}
 .b-blue{background:#eff6ff;color:#1d4ed8}.b-green{background:#f0fdf4;color:#16a34a}
 .b-purple{background:#faf5ff;color:#7c3aed}.b-grey{background:#f1f5f9;color:#475569}
-.stats{display:flex;gap:14px;margin-top:10px;font-size:.82rem;color:#64748b}
+.stats{display:flex;align-items:center;gap:18px;margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;font-size:.85rem;color:#64748b}
+.stat-ico{display:inline-flex;align-items:center;gap:5px}
 .action-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:24px 0;padding:14px 0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0}
 .like-btn{padding:9px 18px;border:1px solid #fecaca;background:#fff;border-radius:24px;font-size:.95rem;cursor:pointer}
 .like-btn.on{background:#fef2f2;border-color:#fca5a5}
@@ -75,7 +76,7 @@
 .round-btn{width:44px;height:44px;border-radius:50%;border:1px solid #e2e8f0;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none}
 .round-btn svg{width:24px;height:24px;display:block}
 .round-btn.ok{background:#f0fdf4;border-color:#86efac}
-.stat-like,.stat-share{background:none;border:0;font-size:.82rem;color:#64748b;cursor:pointer;padding:6px 4px;font-family:inherit}
+.stat-like,.stat-share{background:none;border:0;font-size:.85rem;color:#64748b;cursor:pointer;padding:4px 2px;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
 .stat-like.on{color:#dc2626}
 .post-card{cursor:pointer}
 .seemore{color:#1d4ed8;font-weight:600;font-size:.88rem;white-space:nowrap}
@@ -182,7 +183,7 @@
       + "<h2>"+esc(p.title)+"</h2>"
       + '<div class="post-meta">'+esc(p.date||"")+" · "+readTime(p.excerpt)+" · "+labelsHtml(p.labels)+"</div>"
       + '<div class="post-excerpt">'+esc(p.excerpt||"")+' <span class="seemore">ဆက်ဖတ်ရန် →</span></div>'
-      + '<div class="stats"><span>👁 '+fmt(p.views)+"</span>"
+      + '<div class="stats"><span class="stat-ico">👁 <span>'+fmt(p.views)+"</span></span>"
       + '<button class="stat-like'+(liked?" on":"")+'" data-like="'+esc(sl)+'">❤️ <span>'+fmt(p.likes)+"</span></button>"
       + '<button class="stat-share" data-share="'+esc(sl)+'">↗️ <span>'+fmt(p.shares)+"</span></button>"
       + "</div></div>";
