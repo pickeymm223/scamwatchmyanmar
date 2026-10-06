@@ -46,6 +46,7 @@ const HDR_MAP = [
   ["ccy", ["ငွေကြေးအမျိုးအစား", "Currency"]],
   ["othPh", ["📱 အခြားဖုန်းနံပါတ်များ"]],
   ["payOther", ["✏️ အခြား — ငွေပေးချေမှုအမျိုးအစား"]],
+  ["gameId", ["Game ID", "ဂိမ်း ID", "GameID", "🎮 Game ID"]],
   ["socialEx", ["Social Media  & Exchange"]],
   ["payDetail", ["ငွေပေးချေမှုအသေးစိတ်", "Pay အမျိုးစား"]],
 ];
@@ -370,6 +371,9 @@ function globalSearch(q) {
     hits = [];
     ROWS.forEach(r => { if (binanceUids(r[C.othPh]).includes(tid)) hits.push(r); });
     if (hits.length) { addHits("🟡 Binance UID " + tid, hits, "binance"); matchedIds.add(tid); return; }
+    hits = [];
+    ROWS.forEach(r => { if (String(r[C.gameId] || "").trim() === tid) hits.push(r); });
+    if (hits.length) { addHits("🎮 Game ID " + tid, hits, "game_id"); matchedIds.add(tid); return; }
     if (tid.length >= 10) {
       hits = [];
       ROWS.forEach(r => { if (bankDigitsList(r[C.bankAcct]).includes(tid)) hits.push(r); });
