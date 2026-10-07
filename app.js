@@ -592,6 +592,7 @@ async function loadFbAlerts() {
   } catch (e) {
     el.innerHTML = `<p class="muted">${t("no_data")}</p>`;
   }
+   
 }
 
 /* ---------- search chips ---------- */
@@ -610,8 +611,15 @@ document.querySelectorAll("#mainNav a").forEach(a =>
 
 /* ---------- init ---------- */
 document.getElementById("searchForm").addEventListener("submit", e => {
+   
   e.preventDefault();
   const q = document.getElementById("q").value;
+  // Offline check — search needs internet for Sheet data
+  if (!navigator.onLine) {
+    document.getElementById("result").innerHTML =
+      `<div class="loading">📶 အင်တာနက်ဖွင့်မှ စစ်ဆေးနိုင်ပါမည်</div>`;
+      return;
+      }
   document.getElementById("result").innerHTML =
     `<div class="loading"><span class="spinner"></span>${t("loading")}</div>`;
   setTimeout(() => renderResult(q), 1200);
@@ -639,10 +647,10 @@ logWebStats("visit", "-");
         const rec = ROWS.find(x => x._sheetRow === rowNum);
         if (rec) {
           const label = rec[C.phone] || rec[C.name] || rec[C.facebook] || "Record";
-          document.getElementById("result").innerHTML = renderGroup(label, [rec], false);
+        document.getElementById("result").innerHTML = renderGroup(label, [rec], false);
           document.getElementById("result").scrollIntoView({ behavior: "smooth" });
         } else {
-          document.getElementById("result").innerHTML =
+        document.getElementById("result").innerHTML =
             `<p class="muted">Record မတွေ့ပါ</p>`;
         }
       } else {
@@ -656,7 +664,7 @@ logWebStats("visit", "-");
       input.value = q;
       const trySearch = () => {
         if (typeof renderResult === "function") {
-          document.getElementById("result").innerHTML =
+        document.getElementById("result").innerHTML =
             `<div class="loading"><span class="spinner"></span>${t("loading")}</div>`;
           setTimeout(() => renderResult(q), 800);
         } else {
