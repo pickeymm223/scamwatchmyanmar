@@ -157,15 +157,21 @@
 <button id="swChatBtn" aria-label="Chat">💬<span class="dot" id="swChatDot"></span></button>
 <div id="swChatPanel">
   <div id="swChatHead"><span>💬 ScamWatch — မေးမြန်းရန်</span><button id="swChatClose">×</button></div>
-  <div id="swChatName"><input id="swChatNameIn" placeholder="နာမည် (မဖြည့်လည်းရ)"></div>
-  <div id="swChatMsgs"></div>
-  <form id="swChatForm"><input id="swChatIn" placeholder="စာရိုက်ပါ..." autocomplete="off"><button type="submit">➤</button></form>
+  <div id="swChatPreForm" style="padding:16px;display:flex;flex-direction:column;gap:10px;background:#fff;flex:1">
+    <p style="margin:0;font-size:14px;color:#334155">မေးမြန်းရန် အောက်ပါ အချက်အလက်များ ဖြည့်ပါ</p>
+    <input id="swChatNameIn" placeholder="နာမည် *" style="border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-size:14px">
+    <input id="swChatEmailIn" placeholder="Gmail *" type="email" style="border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-size:14px">
+    <button id="swChatStartBtn" style="background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:10px;font-size:15px;font-weight:700;cursor:pointer">စတင်ရန်</button>
+  </div>
+  <div id="swChatMsgs" style="display:none"></div>
+  <form id="swChatForm" style="display:none"><input id="swChatIn" placeholder="စာရိုက်ပါ..." autocomplete="off"><button type="submit">➤</button></form>
 </div>
 <script>
 (function(){
   const API="https://cms.scamwatchmyanmar.com";
+  const IDLE_MS=30*60*1000; // 30 min
   let thread=localStorage.getItem("sw_chat_t")||"", secret=localStorage.getItem("sw_chat_s")||"";
-  let open=false, lastCount=0, timer=null;
+  let open=false, lastCount=0, timer=null, idleTimer=null, lastActive=Date.now();
   const $=id=>document.getElementById(id);
   const btn=$("swChatBtn"), panel=$("swChatPanel"), msgs=$("swChatMsgs");
   function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
@@ -173,38 +179,59 @@
     msgs.innerHTML=list.map(m=>'<div class="swMsg '+m.from+'"><div class="who">'+esc(m.name||(m.from==="a"?"Admin":""))+'</div>'+esc(m.text)+'</div>').join("");
     msgs.scrollTop=msgs.scrollHeight;
   }
+  function showChatUI(){ $("swChatPreForm").style.display="none"; msgs.style.display="flex"; $("swChatForm").style.display="flex"; }
+  function showFormUI(){ $("swChatPreForm").style.display="flex"; msgs.style.display="none"; $("swChatForm").style.display="none"; }
+  function resetIdle(){
+    lastActive=Date.now();
+    if(idleTimer) clearTimeout(idleTimer);
+    idleTimer=setTimeout(closeIdle, IDLE_MS);
+  }
+  async function closeIdle(){
+    if(!thread) return;
+    try{ await fetch(API+"/api/chat/close",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:thread,secret})}); }catch(e){}
+    thread=""; secret=""; localStorage.removeItem("sw_chat_t"); localStorage.removeItem("sw_chat_s");
+    lastCount=0; showFormUI();
+    if(open) poll();
+  }
   async function poll(){
     if(!thread) return;
     try{
       const r=await fetch(API+"/api/chat/thread?id="+encodeURIComponent(thread)+"&secret="+encodeURIComponent(secret));
-      if(!r.ok) return;
+      if(!r.ok){ if(r.status===404){ thread=""; secret=""; localStorage.removeItem("sw_chat_t"); localStorage.removeItem("sw_chat_s"); showFormUI(); } return; }
       const d=await r.json();
+      if(d.closed){ thread=""; secret=""; localStorage.removeItem("sw_chat_t"); localStorage.removeItem("sw_chat_s"); showFormUI(); if(idleTimer) clearTimeout(idleTimer); return; }
       const list=d.msgs||[];
       if(list.length!==lastCount){
         const hadNew=list.length>lastCount && list.slice(-1)[0] && list.slice(-1)[0].from==="a";
-        lastCount=list.length; render(list);
+        lastCount=list.length; render(list); resetIdle();
         if(hadNew && !open) $("swChatDot").style.display="block";
       }
     }catch(e){}
   }
-  btn.onclick=()=>{ open=!open; panel.style.display=open?"flex":"none"; if(open){ $("swChatDot").style.display="none"; poll(); timer=setInterval(poll,5000);} else clearInterval(timer); };
+  $("swChatStartBtn").onclick=async ()=>{
+    const name=$("swChatNameIn").value.trim(), email=$("swChatEmailIn").value.trim();
+    if(!name){ alert("နာမည် ဖြည့်ပါ"); return; }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ alert("Gmail မှန်ကန်စွာ ဖြည့်ပါ"); return; }
+    try{
+      const r=await fetch(API+"/api/chat/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email})});
+      const d=await r.json();
+      if(d.thread){ thread=d.thread; secret=d.secret; localStorage.setItem("sw_chat_t",thread); localStorage.setItem("sw_chat_s",secret); }
+      showChatUI(); lastCount=0; resetIdle(); poll();
+    }catch(e){ alert("ချိတ်ဆက်၍ မရပါ၊ ထပ်ကြိုးစားပါ"); }
+  };
+  btn.onclick=()=>{ open=!open; panel.style.display=open?"flex":"none"; if(open){ $("swChatDot").style.display="none"; if(thread){ showChatUI(); resetIdle(); } else showFormUI(); poll(); timer=setInterval(poll,5000);} else clearInterval(timer); };
   $("swChatClose").onclick=()=>{ open=false; panel.style.display="none"; clearInterval(timer); };
   $("swChatForm").onsubmit=async e=>{
     e.preventDefault();
     const inp=$("swChatIn"), text=inp.value.trim();
-    if(!text) return;
+    if(!text||!thread) return;
     inp.value="";
-    const name=$("swChatNameIn").value.trim();
     try{
-      const r=await fetch(API+"/api/chat/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,text,thread,secret})});
-      const d=await r.json();
-      if(d.thread){ thread=d.thread; secret=d.secret; localStorage.setItem("sw_chat_t",thread); localStorage.setItem("sw_chat_s",secret); }
-      poll();
+      await fetch(API+"/api/chat/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text,thread,secret})});
+      resetIdle(); poll();
     }catch(err){}
   };
-  // welcome message
-  if(!thread) render([{from:"a",name:"ScamWatch",text:"မင်္ဂလာပါ! 🙏 လိမ်လည်မှုနဲ့ ပတ်သက်ပြီး မေးချင်တာ မေးနိုင်ပါတယ်။ Admin က ပြန်ဖြေပေးပါမယ်။"}]);
-  else poll();
+  if(thread){ showChatUI(); poll(); } else showFormUI();
 })();
 </script>
 </body>
