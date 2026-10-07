@@ -17,11 +17,18 @@
 <meta name="theme-color" content="#1d4ed8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="default"><style>
+#splash{position:fixed;inset:0;background:#0a0f1e;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .6s}
+#splash.hide{opacity:0;pointer-events:none}
+#splash img{width:280px;max-width:80%;animation:splashZoom 1.2s ease-out}
+@keyframes splashZoom{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.05);opacity:1}100%{transform:scale(1)}}
+</style>
 <meta name="apple-mobile-web-app-title" content="ScamWatch">
 <link rel="apple-touch-icon" href="/icon-192-full.png">
+
 </head>
-<body>
+<body><div id="splash"><img src="/logo-transparent.png" alt="ScamWatch Myanmar"></div>
+  
 
 <header class="topbar">
   <div class="wrap bar-in">
@@ -249,5 +256,5 @@ if ('serviceWorker' in navigator) {
   if(thread){ showChatUI(); poll(); } else showFormUI();
 })();
 </script>
-</body>
+<script>window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash')?.classList.add('hide')},1400)});setTimeout(()=>{document.getElementById('splash')?.classList.add('hide')},3000);</script></body>
 </html>
