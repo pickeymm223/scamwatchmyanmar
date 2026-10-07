@@ -616,7 +616,7 @@ document.querySelectorAll("#mainNav a").forEach(a =>
   try {
     const ctrl = new AbortController();
     const timeout = setTimeout(() => ctrl.abort(), 8000);
-    await fetch(CSV_URL + "&_t=" + Date.now(), {method: "HEAD", signal: ctrl.signal, cache: "no-store"});
+    await fetch("/manifest.json?_t=" + Date.now(), {signal: ctrl.signal, cache: "no-store"});
     clearTimeout(timeout);
   } catch (err) {
     document.getElementById("result").innerHTML =
