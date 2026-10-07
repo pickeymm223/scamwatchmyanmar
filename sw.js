@@ -1,5 +1,5 @@
 // ScamWatch Myanmar - Service Worker (PWA offline support)
-const CACHE = 'scamwatch-v4';
+const CACHE = 'scamwatch-v5';
 const ASSETS = [
   '/',
   '/index.html',
@@ -12,11 +12,15 @@ const ASSETS = [
 ];
 
 
+
+
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
   );
 });
+
+
 
 
 self.addEventListener('activate', (e) => {
@@ -26,6 +30,8 @@ self.addEventListener('activate', (e) => {
     ).then(() => self.clients.claim())
   );
 });
+
+
 
 
 self.addEventListener('fetch', (e) => {
