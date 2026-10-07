@@ -626,8 +626,7 @@ document.querySelectorAll("#mainNav a").forEach(a =>
   setTimeout(() => renderResult(q), 800);
 });
 
-/
-* ---------- init ---------- */
+/* ---------- init ---------- */
 
 
 loadFbAlerts();
