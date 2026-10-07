@@ -1,5 +1,5 @@
 // ScamWatch Myanmar - Service Worker (PWA offline support)
-const CACHE = 'scamwatch-v3';
+const CACHE = 'scamwatch-v4';
 const ASSETS = [
   '/',
   '/index.html',
