@@ -607,23 +607,28 @@ document.getElementById("menubtn")?.addEventListener("click", () => {
   document.getElementById("mainNav")?.classList.toggle("open");
 });
 document.querySelectorAll("#mainNav a").forEach(a =>
-  a.addEventListener("click", () => document.getElementById("mainNav")?.classList.remove("open")));
-
-/* ---------- init ---------- */
-document.getElementById("searchForm").addEventListener("submit", e => {
-   
+  a.addEventListener("click", () => document.getElementById("mainNav")?.classList.remove("open")));document.getElementById("searchForm").addEventListener("submit", async e => {
   e.preventDefault();
   const q = document.getElementById("q").value;
-  // Offline check — search needs internet for Sheet data
-  if (!navigator.onLine) {
-    document.getElementById("result").innerHTML =
-      `<div class="loading">📶 အင်တာနက်ဖွင့်မှ စစ်ဆေးနိုင်ပါမည်</div>`;
-      return;
-      }
   document.getElementById("result").innerHTML =
     `<div class="loading"><span class="spinner"></span>${t("loading")}</div>`;
-  setTimeout(() => renderResult(q), 1200);
+  // Real connectivity check — try fetching fresh Sheet data
+  try {
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+    await fetch(CSV_URL + "&_t=" + Date.now(), {method: "HEAD", signal: ctrl.signal, cache: "no-store"});
+    clearTimeout(timeout);
+  } catch (err) {
+    document.getElementById("result").innerHTML =
+      `<div class="loading">📶 အင်တာနက်ဖွင့်မှ စစ်ဆေးနိုင်ပါမည်</div>`;
+    return;
+  }
+  setTimeout(() => renderResult(q), 800);
 });
+
+/
+* ---------- init ---------- */
+
 
 loadFbAlerts();
 loadData().catch(() => {
