@@ -256,5 +256,5 @@ if ('serviceWorker' in navigator) {
   if(thread){ showChatUI(); poll(); } else showFormUI();
 })();
 </script>
-<script>window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('splash')?.classList.add('hide')},1400)});setTimeout(()=>{document.getElementById('splash')?.classList.add('hide')},3000);</script></body>
+<script>function hideSplash(){const s=document.getElementById('splash');if(s){s.classList.add('hide');setTimeout(()=>s.remove(),700)}}window.addEventListener('load',()=>{setTimeout(hideSplash,1400)});setTimeout(hideSplash,3000);</script></body>
 </html>
